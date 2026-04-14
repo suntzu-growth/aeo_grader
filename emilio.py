@@ -99,6 +99,7 @@ def get_missing_fields(state: AgentState) -> list[str]:
         "geography",
         "products_services",
         "sector_industry",
+        "aeo_grader_url",
     ]
 
     missing = [
@@ -174,7 +175,7 @@ def parse_input_data(input_data: str) -> dict:
             "industry": data["sector_industry"],
         }
         data["aeo_grader_url"] = (
-            "https://www.hubspot.com/aeo-grader/results?" + urlencode(params)
+            "https://www.hubspot.es/aeo-grader/results?" + urlencode(params)
         )
 
     return data
@@ -202,60 +203,35 @@ async def buscar_aeo(input_data: str) -> str:
                     timeout=30000,
                 )
 
-                await page.wait_for_timeout(2000)
-
-                # Dismiss cookie consent if present
-                try:
-                    accept_btn = page.locator("#hs-eu-confirmation-button")
-                    if await accept_btn.is_visible(timeout=4000):
-                        await accept_btn.click()
-                        await page.wait_for_timeout(1500)
-                except Exception:
-                    pass  # No cookie banner, proceed
-
-                # Wait for AEO results to render (direct results URL — no form submit needed)
-                try:
-                    await page.wait_for_selector("text=ChatGPT", timeout=60000)
-                    await page.wait_for_timeout(3000)
-                except Exception:
-                    await page.wait_for_timeout(8000)  # fallback wait
+                await page.wait_for_timeout(5000)
 
                 # EXTRAEMOS SCORES REALES
                 page_data = await page.evaluate("""() => {
                     const getScoreBlocks = () => {
                         const blocks = [];
-                        // Look for table rows or provider score blocks
-                        // The results page has rows: Provider | AEO Score | Brand Recognition | etc.
-                        const rows = document.querySelectorAll("tr, [class*='row'], [class*='Row']");
+                        const providers = document.querySelectorAll("h3, h2");
 
-                        rows.forEach(row => {
-                            const text = row.innerText || "";
-                            const numbers = text.match(/\\b(\\d{2,3})\\b/g);
+                        providers.forEach(el => {
+                            const text = el.innerText || "";
+
                             if (
-                                (text.includes("ChatGPT") || text.includes("Perplexity") ||
-                                 text.includes("Gemini") || text.includes("Claude") ||
-                                 text.includes("Copilot") || text.includes("OpenAI") ||
-                                 text.includes("Powers") || text.includes("Supports Google") ||
-                                 text.includes("Real-Time")) &&
-                                numbers && numbers.length > 0
+                                text.includes("ChatGPT") ||
+                                text.includes("Perplexity") ||
+                                text.includes("Gemini")
                             ) {
-                                // Try to determine provider name
-                                let provider = "";
-                                if (text.includes("ChatGPT") || text.includes("OpenAI") || text.includes("Powers")) provider = "ChatGPT";
-                                else if (text.includes("Perplexity") || text.includes("Real-Time")) provider = "Perplexity";
-                                else if (text.includes("Gemini") || text.includes("Supports Google")) provider = "Gemini";
-                                else if (text.includes("Claude")) provider = "Claude";
-                                else if (text.includes("Copilot")) provider = "Copilot";
-                                else provider = text.slice(0, 30);
+                                const parent = el.closest("div");
+                                if (!parent) return;
 
-                                const exists = blocks.some(b => b.provider === provider);
-                                if (!exists) {
-                                    blocks.push({
-                                        provider: provider,
-                                        overall_score: parseInt(numbers[0]),
-                                        raw: text.slice(0, 300)
-                                    });
-                                }
+                                const scoreEl = parent.querySelector("div");
+                                const scoreText = parent.innerText;
+
+                                const match = scoreText.match(/\\b(\\d{2})\\b/);
+
+                                blocks.push({
+                                    provider: text,
+                                    score: match ? parseInt(match[1]) : null,
+                                    raw: scoreText.slice(0, 200)
+                                });
                             }
                         });
 
@@ -266,7 +242,7 @@ async def buscar_aeo(input_data: str) -> str:
                         url: window.location.href,
                         title: document.title,
                         scores: getScoreBlocks(),
-                        body: document.body.innerText.slice(0, 10000)
+                        body: document.body.innerText.slice(0, 5000)
                     };
                 }""")
 
@@ -429,7 +405,7 @@ class ChatService:
         reply = get_last_assistant_text(self.state["messages"]) or "(sin respuesta)"
 
         return reply
-    
+
 import asyncio
 
 if __name__ == "__main__":
