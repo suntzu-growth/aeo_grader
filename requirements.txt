@@ -10,3 +10,4 @@ langchain-core>=1.0.0
 langgraph>=1.0.0
 langgraph-prebuilt>=1.0.0
 google-genai>=1.0.0
+langsmith>=0.1.0
