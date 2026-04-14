@@ -175,7 +175,7 @@ def parse_input_data(input_data: str) -> dict:
             "industry": data["sector_industry"],
         }
         data["aeo_grader_url"] = (
-            "https://www.hubspot.es/aeo-grader/results?" + urlencode(params)
+            "https://www.hubspot.com/aeo-grader/results?" + urlencode(params)
         )
 
     return data
@@ -203,7 +203,23 @@ async def buscar_aeo(input_data: str) -> str:
                     timeout=30000,
                 )
 
-                await page.wait_for_timeout(5000)
+                await page.wait_for_timeout(2000)
+
+                # Dismiss cookie consent if present
+                try:
+                    accept_btn = page.locator("#hs-eu-confirmation-button")
+                    if await accept_btn.is_visible(timeout=4000):
+                        await accept_btn.click()
+                        await page.wait_for_timeout(1500)
+                except Exception:
+                    pass  # No cookie banner, proceed
+
+                # Wait for AEO results to render
+                try:
+                    await page.wait_for_selector("text=ChatGPT", timeout=60000)
+                    await page.wait_for_timeout(3000)
+                except Exception:
+                    await page.wait_for_timeout(8000)  # fallback wait
 
                 # EXTRAEMOS SCORES REALES
                 page_data = await page.evaluate("""() => {
