@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>AEO Grader — Suntzu</title>
+  <title>SEO Operator — Suntzu</title>
   <link rel="preconnect" href="https://fonts.googleapis.com" />
   <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet" />
   <style>
@@ -14,8 +14,8 @@
       --surface: #111118;
       --surface2: #1a1a24;
       --border: #2a2a38;
-      --accent: #6c63ff;
-      --accent-dim: rgba(108,99,255,.15);
+      --accent: #e8272a;
+      --accent-dim: rgba(232,39,42,.12);
       --text: #e8e8f0;
       --text-muted: #7070a0;
       --green: #22c55e;
@@ -40,17 +40,26 @@
       justify-content: center;
       height: 100dvh;
       gap: 2rem;
-      background: radial-gradient(ellipse at 50% 0%, rgba(108,99,255,.12) 0%, transparent 70%);
+      background: radial-gradient(ellipse at 50% 0%, rgba(232,39,42,.1) 0%, transparent 70%);
     }
-    .login-logo {
+    .login-logos {
       display: flex;
       align-items: center;
-      gap: .75rem;
-      font-size: 1.6rem;
+      gap: 1.25rem;
+    }
+    .login-logos img { height: 32px; width: auto; }
+    .login-logos .separator {
+      width: 1px;
+      height: 28px;
+      background: var(--border);
+    }
+    .login-title {
+      font-size: 1.5rem;
       font-weight: 700;
       letter-spacing: -.02em;
+      color: var(--text);
     }
-    .login-logo .accent { color: var(--accent); }
+    .login-title span { color: var(--accent); }
     .login-card {
       background: var(--surface);
       border: 1px solid var(--border);
@@ -61,7 +70,7 @@
       flex-direction: column;
       gap: 1.25rem;
     }
-    .login-card h2 { font-size: 1.1rem; font-weight: 600; text-align: center; }
+    .login-card h2 { font-size: 1.1rem; font-weight: 600; text-align: center; color: var(--text-muted); }
     .field { display: flex; flex-direction: column; gap: .4rem; }
     .field label { font-size: .8rem; color: var(--text-muted); font-weight: 500; }
     .field input {
@@ -101,26 +110,49 @@
       padding: .6rem;
     }
 
-    /* ── APP ── */
+    /* ── APP SHELL ── */
     #app { display: none; flex-direction: column; height: 100dvh; }
 
+    /* ── HEADER ── */
     header {
       display: flex;
       align-items: center;
       justify-content: space-between;
-      padding: .9rem 1.5rem;
+      padding: .75rem 1.5rem;
       border-bottom: 1px solid var(--border);
       background: var(--surface);
       flex-shrink: 0;
+      gap: 1rem;
     }
-    .header-brand {
+    .header-left {
       display: flex;
       align-items: center;
-      gap: .6rem;
-      font-weight: 700;
-      font-size: 1.05rem;
+      gap: 1rem;
     }
-    .header-brand .dot { width: 8px; height: 8px; background: var(--accent); border-radius: 50%; }
+    .header-logos {
+      display: flex;
+      align-items: center;
+      gap: .85rem;
+    }
+    .header-logos img { height: 26px; width: auto; }
+    .header-logos .sep {
+      width: 1px;
+      height: 22px;
+      background: var(--border);
+    }
+    .header-product {
+      display: flex;
+      align-items: center;
+      gap: .5rem;
+      padding-left: 1rem;
+      border-left: 1px solid var(--border);
+    }
+    .header-product-name {
+      font-weight: 700;
+      font-size: 1rem;
+      letter-spacing: -.01em;
+    }
+    .header-product-name span { color: var(--accent); }
     .header-right { display: flex; align-items: center; gap: .75rem; }
     .btn-icon {
       background: none;
@@ -138,18 +170,137 @@
     }
     .btn-icon:hover { color: var(--text); background: var(--surface2); border-color: var(--accent); }
 
-    .status-bar {
+    /* ── BODY LAYOUT ── */
+    .app-body {
+      display: flex;
+      flex: 1;
+      overflow: hidden;
+    }
+
+    /* ── SIDEBAR ── */
+    .sidebar {
+      width: 220px;
+      flex-shrink: 0;
+      background: var(--surface);
+      border-right: 1px solid var(--border);
+      display: flex;
+      flex-direction: column;
+      padding: 1.25rem .75rem;
+      gap: .25rem;
+      overflow-y: auto;
+    }
+    .sidebar-label {
+      font-size: .68rem;
+      font-weight: 600;
+      color: var(--text-muted);
+      letter-spacing: .08em;
+      text-transform: uppercase;
+      padding: 0 .5rem .6rem;
+    }
+    .connector {
       display: flex;
       align-items: center;
-      gap: .5rem;
-      padding: .4rem 1.5rem;
-      background: var(--surface);
-      border-bottom: 1px solid var(--border);
-      font-size: .75rem;
+      gap: .65rem;
+      padding: .6rem .65rem;
+      border-radius: .65rem;
+      cursor: pointer;
+      transition: background .2s, color .2s;
+      position: relative;
+      border: 1px solid transparent;
+    }
+    .connector:hover:not(.disabled) { background: var(--surface2); }
+    .connector.active {
+      background: var(--accent-dim);
+      border-color: rgba(232,39,42,.3);
+    }
+    .connector.disabled { cursor: default; opacity: .45; }
+    .connector-icon {
+      width: 30px;
+      height: 30px;
+      border-radius: .45rem;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 1rem;
+      flex-shrink: 0;
+      background: var(--surface2);
+      border: 1px solid var(--border);
+    }
+    .connector.active .connector-icon {
+      background: var(--accent-dim);
+      border-color: rgba(232,39,42,.4);
+    }
+    .connector-info { display: flex; flex-direction: column; gap: .1rem; min-width: 0; }
+    .connector-name {
+      font-size: .82rem;
+      font-weight: 500;
+      color: var(--text);
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
+    }
+    .connector-status {
+      font-size: .68rem;
       color: var(--text-muted);
+    }
+    .connector.active .connector-status { color: var(--green); }
+    .connector-badge {
+      margin-left: auto;
+      font-size: .6rem;
+      font-weight: 600;
+      padding: .15rem .4rem;
+      border-radius: 2rem;
+      background: var(--surface2);
+      color: var(--text-muted);
+      border: 1px solid var(--border);
       flex-shrink: 0;
     }
-    .status-dot { width: 6px; height: 6px; border-radius: 50%; background: var(--green); }
+    .connector-divider {
+      height: 1px;
+      background: var(--border);
+      margin: .5rem .5rem;
+    }
+
+    /* ── MAIN CHAT ── */
+    .main {
+      flex: 1;
+      display: flex;
+      flex-direction: column;
+      overflow: hidden;
+    }
+
+    .chat-topbar {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding: .55rem 1.25rem;
+      background: var(--surface);
+      border-bottom: 1px solid var(--border);
+      flex-shrink: 0;
+    }
+    .chat-topbar-left {
+      display: flex;
+      align-items: center;
+      gap: .6rem;
+      font-size: .8rem;
+      color: var(--text-muted);
+    }
+    .status-dot { width: 6px; height: 6px; border-radius: 50%; background: var(--green); flex-shrink: 0; }
+    .btn-new-chat {
+      background: none;
+      border: 1px solid var(--border);
+      color: var(--text-muted);
+      cursor: pointer;
+      padding: .35rem .75rem;
+      border-radius: .5rem;
+      font-family: inherit;
+      font-size: .78rem;
+      transition: color .2s, background .2s, border-color .2s;
+      display: flex;
+      align-items: center;
+      gap: .4rem;
+    }
+    .btn-new-chat:hover { color: var(--text); background: var(--surface2); border-color: var(--accent); }
 
     /* ── MESSAGES ── */
     #messages {
@@ -179,7 +330,7 @@
       font-size: .7rem;
       font-weight: 700;
     }
-    .msg.agent .msg-avatar { background: var(--accent-dim); border: 1px solid var(--accent); color: var(--accent); }
+    .msg.agent .msg-avatar { background: var(--accent-dim); border: 1px solid rgba(232,39,42,.4); color: var(--accent); }
     .msg.user .msg-avatar { background: var(--surface2); border: 1px solid var(--border); color: var(--text-muted); font-size: .65rem; }
 
     .bubble {
@@ -212,14 +363,14 @@
       max-width: 520px;
     }
     .welcome-icon {
-      width: 56px; height: 56px;
+      width: 52px; height: 52px;
       background: var(--accent-dim);
-      border: 1px solid var(--accent);
+      border: 1px solid rgba(232,39,42,.35);
       border-radius: 1rem;
       display: flex; align-items: center; justify-content: center;
-      font-size: 1.6rem;
+      font-size: 1.5rem;
     }
-    .welcome h3 { font-size: 1.2rem; font-weight: 600; }
+    .welcome h3 { font-size: 1.15rem; font-weight: 600; }
     .welcome p { color: var(--text-muted); font-size: .875rem; line-height: 1.7; }
     .chips { display: flex; flex-wrap: wrap; gap: .5rem; justify-content: center; }
     .chip {
@@ -281,13 +432,32 @@
     .btn-send:active { transform: scale(.95); }
     .btn-send:disabled { opacity: .35; cursor: not-allowed; }
     .input-hint { font-size: .72rem; color: var(--text-muted); margin-top: .5rem; padding-left: .25rem; }
+
+    /* ── MARKDOWN in bubbles ── */
+    .bubble table { border-collapse: collapse; width: 100%; margin: .6rem 0; font-size: .82rem; }
+    .bubble th, .bubble td { border: 1px solid var(--border); padding: .4rem .7rem; text-align: left; }
+    .bubble th { background: var(--surface2); font-weight: 600; }
+    .bubble h1, .bubble h2 { font-size: 1rem; margin: .6rem 0 .3rem; }
+    .bubble h3 { font-size: .9rem; margin: .5rem 0 .25rem; }
+    .bubble ul, .bubble ol { padding-left: 1.4rem; }
+    .bubble li { margin: .2rem 0; }
+    .bubble blockquote { border-left: 3px solid var(--border); padding-left: .75rem; color: var(--text-muted); margin: .5rem 0; }
+    .bubble hr { border: none; border-top: 1px solid var(--border); margin: .75rem 0; }
+    .bubble code { background: var(--surface2); padding: .1rem .35rem; border-radius: .3rem; font-size: .82rem; }
   </style>
 </head>
 <body>
 
 <!-- LOGIN -->
 <div id="login-screen">
-  <div class="login-logo">☯ Suntzu <span class="accent">AEO</span></div>
+  <div style="display:flex;flex-direction:column;align-items:center;gap:.75rem">
+    <div class="login-logos">
+      <img src="suntzu_logo_rojo.svg" alt="Suntzu" />
+      <div class="separator"></div>
+      <img src="smartup_logo.webp" alt="Smartup" />
+    </div>
+    <div class="login-title">SEO <span>Operator</span></div>
+  </div>
   <div class="login-card">
     <h2>Acceso al panel</h2>
     <form id="login-form" onsubmit="return false">
@@ -300,23 +470,27 @@
         <input type="password" id="inp-pass" placeholder="••••••••••" autocomplete="current-password" />
       </div>
       <div class="login-error" id="login-error">Usuario o contraseña incorrectos</div>
-      <button type="submit" class="btn-login" id="btn-login">Entrar</button>
+      <button type="submit" class="btn-login" id="btn-login" style="margin-top:.75rem">Entrar</button>
     </form>
   </div>
 </div>
 
 <!-- APP -->
 <div id="app">
+
+  <!-- HEADER -->
   <header>
-    <div class="header-brand">
-      <div class="dot"></div>
-      Suntzu AEO Grader
+    <div class="header-left">
+      <div class="header-logos">
+        <img src="suntzu_logo_rojo.svg" alt="Suntzu" />
+        <div class="sep"></div>
+        <img src="smartup_logo.webp" alt="Smartup" />
+      </div>
+      <div class="header-product">
+        <div class="header-product-name">SEO <span>Operator</span></div>
+      </div>
     </div>
     <div class="header-right">
-      <button class="btn-icon" id="btn-new-chat">
-        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>
-        Nueva
-      </button>
       <button class="btn-icon" id="btn-logout">
         <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"/><polyline points="16 17 21 12 16 7"/><line x1="21" y1="12" x2="9" y2="12"/></svg>
         Salir
@@ -324,33 +498,108 @@
     </div>
   </header>
 
-  <div class="status-bar">
-    <div class="status-dot"></div>
-    AEO Grader API · europe-west1 · activo
-  </div>
+  <!-- BODY -->
+  <div class="app-body">
 
-  <div id="messages">
-    <div class="welcome" id="welcome-msg">
-      <div class="welcome-icon">☯</div>
-      <h3>AEO Grader</h3>
-      <p>Analiza cómo mencionan tu marca ChatGPT, Perplexity y Gemini. Dime el nombre de tu empresa y empezamos.</p>
-      <div class="chips">
-        <div class="chip" data-msg="Quiero analizar mi marca">Analizar mi marca</div>
-        <div class="chip" data-msg="¿Cómo funciona el análisis AEO?">¿Cómo funciona?</div>
-        <div class="chip" data-msg="Analiza Zara en España, sector moda y retail">Ejemplo: Zara</div>
-        <div class="chip" data-msg="Analiza IE University en España, sector educación superior y business school">Ejemplo: IE University</div>
+    <!-- SIDEBAR: CONECTORES -->
+    <aside class="sidebar">
+      <div class="sidebar-label">Conectores</div>
+
+      <!-- AEO Grader — activo -->
+      <div class="connector active" id="connector-aeo">
+        <div class="connector-icon">🤖</div>
+        <div class="connector-info">
+          <div class="connector-name">AEO Grader</div>
+          <div class="connector-status">● Conectado</div>
+        </div>
+      </div>
+
+      <div class="connector-divider"></div>
+
+      <!-- Próximamente -->
+      <div class="connector disabled">
+        <div class="connector-icon">
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#7070a0" stroke-width="2"><circle cx="12" cy="12" r="10"/><path d="M2 12h20M12 2a15.3 15.3 0 0 1 4 10 15.3 15.3 0 0 1-4 10 15.3 15.3 0 0 1-4-10 15.3 15.3 0 0 1 4-10z"/></svg>
+        </div>
+        <div class="connector-info">
+          <div class="connector-name">Search Console</div>
+          <div class="connector-status">Próximamente</div>
+        </div>
+        <div class="connector-badge">soon</div>
+      </div>
+
+      <div class="connector disabled">
+        <div class="connector-icon">
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#7070a0" stroke-width="2"><polyline points="22 12 18 12 15 21 9 3 6 12 2 12"/></svg>
+        </div>
+        <div class="connector-info">
+          <div class="connector-name">GA4</div>
+          <div class="connector-status">Próximamente</div>
+        </div>
+        <div class="connector-badge">soon</div>
+      </div>
+
+      <div class="connector disabled">
+        <div class="connector-icon">
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#7070a0" stroke-width="2"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>
+        </div>
+        <div class="connector-info">
+          <div class="connector-name">SEMrush</div>
+          <div class="connector-status">Próximamente</div>
+        </div>
+        <div class="connector-badge">soon</div>
+      </div>
+
+      <div class="connector disabled">
+        <div class="connector-icon">
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#7070a0" stroke-width="2"><polyline points="23 6 13.5 15.5 8.5 10.5 1 18"/><polyline points="17 6 23 6 23 12"/></svg>
+        </div>
+        <div class="connector-info">
+          <div class="connector-name">Google Trends</div>
+          <div class="connector-status">Próximamente</div>
+        </div>
+        <div class="connector-badge">soon</div>
+      </div>
+    </aside>
+
+    <!-- MAIN: CHAT -->
+    <div class="main">
+      <div class="chat-topbar">
+        <div class="chat-topbar-left">
+          <div class="status-dot"></div>
+          AEO Grader · europe-west1 · activo
+        </div>
+        <button class="btn-new-chat" id="btn-new-chat">
+          <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>
+          Nueva consulta
+        </button>
+      </div>
+
+      <div id="messages">
+        <div class="welcome" id="welcome-msg">
+          <div class="welcome-icon">🤖</div>
+          <h3>AEO Grader</h3>
+          <p>Analiza cómo mencionan tu marca ChatGPT, Perplexity y Gemini. Dime el nombre de tu empresa y empezamos.</p>
+          <div class="chips">
+            <div class="chip" data-msg="Quiero analizar mi marca">Analizar mi marca</div>
+            <div class="chip" data-msg="¿Cómo funciona el análisis AEO?">¿Cómo funciona?</div>
+            <div class="chip" data-msg="Analiza Zara en España, sector moda y retail">Ejemplo: Zara</div>
+            <div class="chip" data-msg="Analiza IE University en España, sector educación superior y business school">Ejemplo: IE University</div>
+          </div>
+        </div>
+      </div>
+
+      <div class="input-wrapper">
+        <div class="input-row">
+          <textarea id="user-input" placeholder="Escribe aquí…" rows="1"></textarea>
+          <button class="btn-send" id="btn-send" disabled>
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><line x1="22" y1="2" x2="11" y2="13"/><polygon points="22 2 15 22 11 13 2 9 22 2"/></svg>
+          </button>
+        </div>
+        <div class="input-hint">Enter para enviar · Shift+Enter nueva línea</div>
       </div>
     </div>
-  </div>
 
-  <div class="input-wrapper">
-    <div class="input-row">
-      <textarea id="user-input" placeholder="Escribe aquí…" rows="1"></textarea>
-      <button class="btn-send" id="btn-send" disabled>
-        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><line x1="22" y1="2" x2="11" y2="13"/><polygon points="22 2 15 22 11 13 2 9 22 2"/></svg>
-      </button>
-    </div>
-    <div class="input-hint">Enter para enviar · Shift+Enter nueva línea</div>
   </div>
 </div>
 
@@ -375,7 +624,6 @@
   let sessionId = null;
   let isLoading = false;
 
-  // ── Session check ──
   function showApp() {
     loginScreen.style.display = "none";
     appEl.style.display = "flex";
@@ -390,7 +638,6 @@
 
   if (sessionStorage.getItem(SESSION_KEY) === "ok") showApp();
 
-  // ── Login ──
   function doLogin() {
     const u = inpUser.value.trim();
     const p = inpPass.value;
@@ -407,12 +654,10 @@
 
   document.getElementById("login-form").addEventListener("submit", doLogin);
   btnLogin.addEventListener("click", doLogin);
-
   document.getElementById("btn-logout").addEventListener("click", () => {
     sessionStorage.removeItem(SESSION_KEY);
     showLogin();
   });
-
   document.getElementById("btn-new-chat").addEventListener("click", () => {
     sessionId = null;
     messagesEl.innerHTML = "";
@@ -420,7 +665,6 @@
     welcomeMsg.style.display = "flex";
   });
 
-  // ── Chips ──
   document.querySelectorAll(".chip").forEach(c => {
     c.addEventListener("click", () => {
       inputEl.value = c.dataset.msg;
@@ -429,7 +673,6 @@
     });
   });
 
-  // ── Textarea auto-resize ──
   inputEl.addEventListener("input", () => {
     inputEl.style.height = "auto";
     inputEl.style.height = Math.min(inputEl.scrollHeight, 160) + "px";
@@ -439,7 +682,6 @@
   });
   sendBtn.addEventListener("click", sendMessage);
 
-  // ── Send ──
   async function sendMessage() {
     const text = inputEl.value.trim();
     if (!text || isLoading) return;
@@ -496,17 +738,74 @@
   function addTyping() {
     const msg = document.createElement("div");
     msg.className = "msg agent typing";
-    msg.innerHTML = `<div class="msg-avatar" style="background:var(--accent-dim);border:1px solid var(--accent);color:var(--accent);display:flex;align-items:center;justify-content:center;width:32px;height:32px;border-radius:50%;font-size:.7rem;font-weight:700;flex-shrink:0">AI</div><div class="bubble"><span></span><span></span><span></span></div>`;
+    msg.innerHTML = `<div class="msg-avatar" style="background:var(--accent-dim);border:1px solid rgba(232,39,42,.4);color:var(--accent);display:flex;align-items:center;justify-content:center;width:32px;height:32px;border-radius:50%;font-size:.7rem;font-weight:700;flex-shrink:0">AI</div><div class="bubble"><span></span><span></span><span></span></div>`;
     messagesEl.appendChild(msg);
     messagesEl.scrollTop = messagesEl.scrollHeight;
     return msg;
   }
 
+  // Markdown renderer (tables, bold, headers, lists, hr, blockquote)
   function fmt(t) {
-    return t
-      .replace(/&/g,"&amp;").replace(/</g,"&lt;").replace(/>/g,"&gt;")
-      .replace(/\*\*(.+?)\*\*/g,"<strong>$1</strong>")
-      .replace(/\n/g,"<br>");
+    let s = t
+      .replace(/&/g,"&amp;").replace(/</g,"&lt;").replace(/>/g,"&gt;");
+
+    // Tables
+    const lines = s.split('\n');
+    let result = [];
+    let inTable = false;
+    let tableRows = [];
+
+    for (let i = 0; i < lines.length; i++) {
+      const line = lines[i];
+      if (line.trim().startsWith('|') && line.trim().endsWith('|')) {
+        if (!inTable) { inTable = true; tableRows = []; }
+        tableRows.push(line);
+      } else {
+        if (inTable) {
+          result.push(renderTable(tableRows));
+          tableRows = [];
+          inTable = false;
+        }
+        result.push(line);
+      }
+    }
+    if (inTable) result.push(renderTable(tableRows));
+    s = result.join('\n');
+
+    // Headings
+    s = s.replace(/^### (.+)$/gm, '<h3>$1</h3>');
+    s = s.replace(/^## (.+)$/gm, '<h2>$1</h2>');
+    s = s.replace(/^# (.+)$/gm, '<h1>$1</h1>');
+    // HR
+    s = s.replace(/^---+$/gm, '<hr>');
+    // Blockquote
+    s = s.replace(/^&gt; (.+)$/gm, '<blockquote>$1</blockquote>');
+    // Bold / italic
+    s = s.replace(/\*\*(.+?)\*\*/g, '<strong>$1</strong>');
+    s = s.replace(/\*(.+?)\*/g, '<em>$1</em>');
+    // Inline code
+    s = s.replace(/`([^`]+)`/g, '<code>$1</code>');
+    // Bullet lists
+    s = s.replace(/((?:^[•\-\*] .+\n?)+)/gm, (m) => {
+      const items = m.trim().split('\n').map(l => `<li>${l.replace(/^[•\-\*] /, '')}</li>`).join('');
+      return `<ul>${items}</ul>`;
+    });
+    // Newlines
+    s = s.replace(/\n/g, '<br>');
+    return s;
+  }
+
+  function renderTable(rows) {
+    const filtered = rows.filter(r => !r.match(/^\|[-| :]+\|$/));
+    if (!filtered.length) return '';
+    let html = '<table>';
+    filtered.forEach((row, i) => {
+      const cells = row.split('|').slice(1, -1).map(c => c.trim());
+      const tag = i === 0 ? 'th' : 'td';
+      html += '<tr>' + cells.map(c => `<${tag}>${c}</${tag}>`).join('') + '</tr>';
+    });
+    html += '</table>';
+    return html;
   }
 </script>
 </body>
