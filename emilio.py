@@ -21,6 +21,7 @@ from langchain_core.messages import (
 )
 from langchain_core.tools import StructuredTool
 from langgraph.graph import StateGraph, END
+from tools.gsc_tool import buscar_gsc
 from langgraph.graph.message import add_messages
 from langgraph.prebuilt import ToolNode
 
@@ -99,7 +100,6 @@ def get_missing_fields(state: AgentState) -> list[str]:
         "geography",
         "products_services",
         "sector_industry",
-        "aeo_grader_url",
     ]
 
     missing = [
@@ -314,12 +314,28 @@ buscar_aeo_tool = StructuredTool.from_function(
     return_direct=False,
 )
 
+buscar_gsc_tool = StructuredTool.from_function(
+    func=None,
+    coroutine=buscar_gsc,
+    name="buscar_gsc",
+    description=(
+        "Consulta Google Search Console para obtener datos de rendimiento SEO. "
+        "Recibe un único parámetro `input_data`, que debe ser un JSON string con: "
+        "site_url (requerido, ej: 'https://www.ejemplo.com/'), "
+        "start_date (opcional, 'YYYY-MM-DD'), "
+        "end_date (opcional, 'YYYY-MM-DD'), "
+        "dimensions (opcional, lista: ['query', 'page', 'country', 'device']), "
+        "row_limit (opcional, int, default 10)."
+    ),
+    return_direct=False,
+)
+
 # =========================
 # NODES
 # =========================
 
 def make_agent_node(llm, prompt_text: str):
-    llm_with_tools = llm.bind_tools([buscar_aeo_tool])
+    llm_with_tools = llm.bind_tools([buscar_aeo_tool, buscar_gsc_tool])
 
     async def agent_node(state: AgentState) -> dict:
         system_msg = build_system_message(state, prompt_text)
@@ -379,7 +395,7 @@ def create_graph():
     graph = StateGraph(AgentState)
 
     agent_node = make_agent_node(llm, prompt_text)
-    tool_node = ToolNode([buscar_aeo_tool])
+    tool_node = ToolNode([buscar_aeo_tool, buscar_gsc_tool])
 
     graph.add_node("agent", agent_node)
     graph.add_node("tools", tool_node)
