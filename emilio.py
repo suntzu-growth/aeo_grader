@@ -22,6 +22,7 @@ from langchain_core.messages import (
 from langchain_core.tools import StructuredTool
 from langgraph.graph import StateGraph, END
 from tools.gsc_tool import buscar_gsc
+from tools.ga4_tool import buscar_ga4
 from langgraph.graph.message import add_messages
 from langgraph.prebuilt import ToolNode
 
@@ -314,6 +315,23 @@ buscar_aeo_tool = StructuredTool.from_function(
     return_direct=False,
 )
 
+buscar_ga4_tool = StructuredTool.from_function(
+    func=None,
+    coroutine=buscar_ga4,
+    name="buscar_ga4",
+    description=(
+        "Consulta Google Analytics 4 para obtener datos de tráfico y comportamiento. "
+        "Recibe un único parámetro `input_data`, que debe ser un JSON string con: "
+        "property_id (requerido, solo el número, ej: '123456789'), "
+        "start_date (opcional, 'YYYY-MM-DD'), "
+        "end_date (opcional, 'YYYY-MM-DD'), "
+        "metrics (opcional, lista, ej: ['sessions', 'activeUsers', 'screenPageViews']), "
+        "dimensions (opcional, lista, ej: ['pagePath', 'sessionSource']), "
+        "row_limit (opcional, int, default 10)."
+    ),
+    return_direct=False,
+)
+
 buscar_gsc_tool = StructuredTool.from_function(
     func=None,
     coroutine=buscar_gsc,
@@ -335,7 +353,7 @@ buscar_gsc_tool = StructuredTool.from_function(
 # =========================
 
 def make_agent_node(llm, prompt_text: str):
-    llm_with_tools = llm.bind_tools([buscar_aeo_tool, buscar_gsc_tool])
+    llm_with_tools = llm.bind_tools([buscar_aeo_tool, buscar_ga4_tool, buscar_gsc_tool])
 
     async def agent_node(state: AgentState) -> dict:
         system_msg = build_system_message(state, prompt_text)
@@ -395,7 +413,7 @@ def create_graph():
     graph = StateGraph(AgentState)
 
     agent_node = make_agent_node(llm, prompt_text)
-    tool_node = ToolNode([buscar_aeo_tool, buscar_gsc_tool])
+    tool_node = ToolNode([buscar_aeo_tool, buscar_ga4_tool, buscar_gsc_tool])
 
     graph.add_node("agent", agent_node)
     graph.add_node("tools", tool_node)
