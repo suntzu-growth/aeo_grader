@@ -2,6 +2,7 @@ from __future__ import annotations
 
 import os
 import json
+from datetime import date
 from typing import Any, Optional, TypedDict, Annotated
 
 import yaml
@@ -103,9 +104,10 @@ def get_missing_fields(state: AgentState) -> list[str]:
         "sector_industry",
     ]
 
+    aeo_input = state.get("aeo_input", {})
     missing = [
         key for key in required
-        if not state["aeo_input"].get(key)
+        if not aeo_input.get(key)
     ]
 
     return missing
@@ -135,13 +137,19 @@ def build_system_message(state: AgentState, prompt_text: str) -> SystemMessage:
     missing = get_missing_fields(state)
 
     state_view = {
-        "aeo_input": state["aeo_input"],
+        "aeo_input": state.get("aeo_input", {}),
         "missing_fields": missing,
-        "has_data_aeo": state["data_aeo"] is not None,
+        "has_data_aeo": state.get("data_aeo") is not None,
     }
 
     content = f"""
         {prompt_text}
+
+        ========================
+        CONTEXTO TEMPORAL
+        ========================
+        Fecha actual: {date.today().strftime('%Y-%m-%d')}
+        Hoy es: {date.today().strftime('%A, %d de %B de %Y')}
 
         ========================
         ESTADO ACTUAL (FUENTE DE VERDAD)
@@ -373,8 +381,8 @@ def route_after_agent(state: AgentState) -> str:
 
 
 def save_tool_output_node(state: AgentState) -> dict:
-    new_data_aeo = state["data_aeo"]
-    new_aeo_input = state["aeo_input"]
+    new_data_aeo = state.get("data_aeo")
+    new_aeo_input = state.get("aeo_input", {})
 
     for msg in reversed(state["messages"]):
         if isinstance(msg, ToolMessage) and msg.name == "buscar_aeo":
@@ -396,6 +404,8 @@ def save_tool_output_node(state: AgentState) -> dict:
         "data_aeo": new_data_aeo,
         "aeo_input": new_aeo_input,
     }
+from langgraph.checkpoint.memory import MemorySaver
+
 # =========================
 # GRAPH
 # =========================
@@ -433,26 +443,37 @@ def create_graph():
     graph.add_edge("tools", "save_tool_output")
     graph.add_edge("save_tool_output", "agent")
 
-    return graph.compile()
+    # Añadimos checkpointer para memoria persistente e hilos en LangSmith
+    memory = MemorySaver()
+    return graph.compile(checkpointer=memory)
 
 
 # =========================
-# EXAMPLE
+# EXAMPLE / SERVICE
 # =========================
 class ChatService:
     def __init__(self):
         self.graph = create_graph()
-        self.state = create_initial_state()
+        # El estado inicial ya no se guarda manualmente aquí, 
+        # se gestionará por el checkpointer usando el thread_id.
 
-    async def chat(self, user_input: str):
-        self.state["messages"].append(HumanMessage(content=user_input))
+    async def chat(self, user_input: str, session_id: str):
+        config = {"configurable": {"thread_id": session_id}}
+        
+        # Enviamos el mensaje
+        input_msg = HumanMessage(content=user_input)
+        
+        # Ejecutamos el grafo con el config (hilos)
+        # LangGraph se encarga de recuperar/guardar los mensajes previos
+        out = await self.graph.ainvoke({"messages": [input_msg]}, config=config)
+        
+        # Guardamos el estado para referencia (opcional, el checkpointer ya lo tiene)
+        last_messages = out.get("messages", [])
+        
+        # LOG PARA DEPURACIÓN
+        print(f"DEBUG: Ultimo mensaje de la IA para session {session_id}: {last_messages[-1] if last_messages else 'None'}")
 
-        # CAMBIO CLAVE
-        out = await self.graph.ainvoke(self.state)
-
-        self.state = out
-
-        reply = get_last_assistant_text(self.state["messages"]) or "(sin respuesta)"
+        reply = get_last_assistant_text(last_messages) or "(sin respuesta técnica)"
 
         return reply
 

@@ -52,7 +52,7 @@ async def chat(request: ChatRequest):
     service = sessions[session_id]
 
     try:
-        reply = await service.chat(request.message)
+        reply = await service.chat(request.message, session_id)
     except Exception as e:
         raise HTTPException(status_code=500, detail=str(e))
 

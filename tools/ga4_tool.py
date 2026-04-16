@@ -48,11 +48,24 @@ async def buscar_ga4(input_data: str) -> str:
 
         property_id = data.get("property_id")
         if not property_id:
-            raise ValueError("Campo requerido: property_id (ej: '123456789')")
+            # Propiedad por defecto del proyecto
+            property_id = "525948952"
 
-        # Fechas por defecto: últimos 28 días
-        end_date   = data.get("end_date",   str(date.today() - timedelta(days=1)))
-        start_date = data.get("start_date", str(date.today() - timedelta(days=28)))
+        # 1. Prioridad: days_ago (para evitar alucinaciones del LLM)
+        days_ago = data.get("days_ago")
+        
+        if days_ago:
+            try:
+                days_int = int(days_ago)
+                end_date   = str(date.today() - timedelta(days=1))
+                start_date = str(date.today() - timedelta(days=days_int))
+            except Exception:
+                end_date   = data.get("end_date",   str(date.today() - timedelta(days=1)))
+                start_date = data.get("start_date", str(date.today() - timedelta(days=28)))
+        else:
+            # Fechas por defecto: últimos 28 días
+            end_date   = data.get("end_date",   str(date.today() - timedelta(days=1)))
+            start_date = data.get("start_date", str(date.today() - timedelta(days=28)))
 
         metrics_input    = data.get("metrics",    ["sessions", "activeUsers", "screenPageViews"])
         dimensions_input = data.get("dimensions", ["pagePath"])
@@ -84,6 +97,8 @@ async def buscar_ga4(input_data: str) -> str:
         return json.dumps(
             {
                 "status":       "success",
+                "connection_verified": True,
+                "message":      "Conexión exitosa con la API de Google Analytics 4.",
                 "property_id":  property_id,
                 "start_date":   start_date,
                 "end_date":     end_date,
