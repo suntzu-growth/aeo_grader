@@ -1,0 +1,217 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Sun Tzu &mdash; Sapira Acceso</title>
+<style>
+  *, *::before, *::after { margin: 0; padding: 0; box-sizing: border-box; }
+
+  :root {
+    --bg: #f3f3f3;
+    --white: #ffffff;
+    --blue: #7998ae;
+    --red: #fe3f3c;
+    --text: #1a1a1a;
+    --muted: #6b7a8a;
+    --border: rgba(121,152,174,0.2);
+    --borderB: rgba(121,152,174,0.4);
+    --transition: 0.25s cubic-bezier(0.4, 0, 0.2, 1);
+  }
+
+  html { font-size: 15px; }
+  body {
+    font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+    background: var(--bg);
+    color: var(--text);
+    min-height: 100vh;
+  }
+
+  .login-wrap {
+    display: flex;
+    min-height: 100vh;
+  }
+
+  .login-left {
+    flex: 0 0 50%;
+    background: url('public/login-bg.jpg') center/cover no-repeat;
+    background-color: #1a2530;
+  }
+
+  .login-right {
+    flex: 1;
+    display: flex; align-items: center; justify-content: center;
+    background: var(--white);
+    padding: 60px 64px;
+    overflow-y: auto;
+  }
+
+  .login-form-wrap {
+    width: 100%; max-width: 400px;
+  }
+
+  .login-brand {
+    display: flex; align-items: center; gap: 16px;
+    margin-bottom: 44px;
+  }
+  .login-brand svg { width: 32px; height: 32px; }
+  .login-brand .lsep {
+    width: 1px; height: 24px;
+    background: var(--borderB);
+  }
+  .login-brand img { height: 18px; }
+
+  .login-form-wrap h2 {
+    font-size: 26px; font-weight: 800;
+    letter-spacing: -0.5px; line-height: 1.2;
+    color: var(--text); margin-bottom: 12px;
+  }
+
+  .login-desc {
+    font-size: 13px; color: var(--muted);
+    line-height: 1.75; margin-bottom: 36px;
+  }
+
+  .input-group { margin-bottom: 20px; text-align: left; }
+  .input-group-head {
+    display: flex; align-items: center; justify-content: space-between;
+    margin-bottom: 6px;
+  }
+  .input-group label {
+    display: block;
+    font-size: 10px; font-weight: 700;
+    letter-spacing: 1.5px; text-transform: uppercase;
+    color: var(--muted);
+  }
+  .input-group input {
+    width: 100%; padding: 13px 16px;
+    background: var(--bg);
+    border: 1px solid var(--border);
+    border-radius: 4px;
+    color: var(--text); font-size: 14px;
+    font-family: inherit;
+    transition: border-color var(--transition);
+    outline: none;
+  }
+  .input-group input:focus { border-color: var(--blue); }
+  .input-group input::placeholder { color: #aab5be; }
+
+  .login-btn {
+    width: 100%; padding: 16px;
+    margin-top: 28px;
+    background: var(--red); color: #fff;
+    border: none; border-radius: 4px;
+    font-size: 11px; font-weight: 800;
+    letter-spacing: 3px; text-transform: uppercase;
+    font-family: inherit; cursor: pointer;
+    display: flex; align-items: center; justify-content: center; gap: 8px;
+    transition: opacity var(--transition), transform 0.15s ease;
+  }
+  .login-btn:hover { opacity: 0.88; }
+  .login-btn:active { transform: scale(0.98); }
+  .login-btn:disabled { opacity: 0.5; cursor: not-allowed; }
+
+  .login-secure {
+    display: flex; align-items: center; gap: 8px;
+    margin-top: 18px;
+    font-size: 10px; font-weight: 600;
+    letter-spacing: 1.2px; text-transform: uppercase;
+    color: var(--muted);
+  }
+
+  .login-error {
+    color: var(--red);
+    font-size: 12px; font-weight: 600;
+    margin-top: 12px; min-height: 1.2em;
+  }
+
+  .login-footer {
+    margin-top: 44px;
+    padding-top: 20px;
+    border-top: 1px solid var(--border);
+    font-size: 10px; color: var(--muted); line-height: 1.65;
+  }
+
+  @media (max-width: 768px) {
+    .login-left { display: none; }
+    .login-right { padding: 40px 28px; }
+  }
+</style>
+</head>
+<body>
+
+  <div class="login-wrap">
+    <div class="login-left"></div>
+    <div class="login-right">
+      <div class="login-form-wrap">
+        <div class="login-brand">
+          <svg viewBox="0 0 40 40" xmlns="http://www.w3.org/2000/svg">
+            <path d="M 24.166 34.02 L 18.662 34.02 L 18.662 33.451 C 18.833 33.345 19.009 33.232 19.194 33.109 C 19.969 32.591 20.692 32.025 21.36 31.414 L 36.348 31.414 C 36.961 30.533 37.505 29.599 37.971 28.622 C 37.7 28.295 37.443 27.958 37.202 27.61 C 36.09 26.003 35.357 24.251 35.026 22.403 C 34.896 21.672 34.83 20.922 34.83 20.174 L 34.83 19.736 L 37.858 19.736 L 37.858 20.174 C 37.858 21.97 38.355 23.671 39.238 25.185 C 39.68 23.532 39.917 21.794 39.917 20.001 C 39.917 19.405 39.889 18.817 39.838 18.235 L 39.819 18.236 C 39.747 18.239 39.676 18.243 39.607 18.244 C 39.51 18.247 39.415 18.249 39.321 18.249 C 38.514 18.249 37.717 18.159 36.941 17.984 C 35.729 17.71 34.569 17.226 33.511 16.548 C 31.944 15.543 30.664 14.157 29.789 12.522 C 28.914 14.157 27.634 15.543 26.066 16.548 C 25.009 17.226 23.849 17.71 22.636 17.984 C 21.861 18.159 21.063 18.249 20.256 18.249 C 20.163 18.249 20.068 18.248 19.97 18.244 C 19.901 18.243 19.831 18.239 19.759 18.236 L 19.55 18.227 L 19.55 15.654 L 19.781 15.668 C 19.944 15.677 20.104 15.682 20.256 15.682 C 24.805 15.682 28.506 11.974 28.506 7.415 L 28.506 6.723 L 31.072 6.723 L 31.072 7.415 C 31.072 11.973 34.772 15.682 39.322 15.682 C 39.363 15.682 39.406 15.681 39.448 15.681 C 37.476 6.711 29.5 0 19.958 0 C 8.935 0 0 8.954 0 20 C 0 28.923 5.832 36.48 13.884 39.056 L 13.884 33.74 C 12.033 34.341 10.084 34.645 8.079 34.645 L 7.642 34.645 L 7.642 31.617 L 8.079 31.617 C 15.6 31.617 21.718 26.483 21.718 20.174 L 21.718 19.736 L 24.746 19.736 L 24.746 20.174 C 24.746 20.922 24.68 21.672 24.55 22.403 C 24.219 24.252 23.487 26.003 22.374 27.61 C 21.29 29.176 19.894 30.534 18.224 31.65 C 17.965 31.822 17.726 31.973 17.493 32.11 C 17.3 32.226 17.105 32.338 16.911 32.443 L 16.911 39.769 C 17.904 39.921 18.921 40.001 19.957 40.001 C 21.401 40.001 22.808 39.846 24.165 39.554 L 24.165 34.021 Z M 26.496 20.173 L 26.496 19.954 L 33.081 19.954 L 33.081 20.173 C 33.081 20.974 33.147 21.775 33.279 22.56 L 26.299 22.56 C 26.43 21.774 26.496 20.973 26.496 20.173 Z M 25.407 25.684 L 34.17 25.684 C 34.539 26.584 35 27.455 35.549 28.29 L 24.027 28.29 C 24.577 27.455 25.037 26.584 25.407 25.684 Z" fill="rgb(250, 36, 46)"/>
+            <path d="M 26.764 34.02 L 32.809 34.02 L 32.809 35.3 C 31.032 36.8 28.991 37.996 26.764 38.806 Z" fill="rgb(250, 36, 46)"/>
+          </svg>
+          <div class="lsep"></div>
+        </div>
+        <h2>Portal de Lanzamiento</h2>
+        <p class="login-desc">Esta es una plataforma privada para preparar el lanzamiento al mercado de Sapira.</p>
+        <form id="login-form" autocomplete="off">
+          <div class="input-group">
+            <div class="input-group-head">
+              <label>Usuario</label>
+            </div>
+            <input type="text" id="login-user" placeholder="ej. ejecutivo_estrategia" autofocus />
+          </div>
+          <div class="input-group">
+            <div class="input-group-head">
+              <label>Contrase&ntilde;a</label>
+            </div>
+            <input type="password" id="login-pass" placeholder="&bull;&bull;&bull;&bull;&bull;&bull;&bull;&bull;" />
+          </div>
+          <button type="submit" class="login-btn" id="login-btn">Acceder al Portal &nbsp;&rarr;</button>
+          <p class="login-error" id="login-error"></p>
+          <div class="login-secure">
+            <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/></svg>
+            Acceso restringido y cifrado
+          </div>
+        </form>
+        <div class="login-footer">
+          &copy; 2024 Corporate Strategy Unit. All rights reserved.<br>
+          Confidential Information &middot; Level 5 Access Required.
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <script>
+    document.getElementById('login-form').addEventListener('submit', async (e) => {
+      e.preventDefault();
+      const btn = document.getElementById('login-btn');
+      const errorEl = document.getElementById('login-error');
+      const user = document.getElementById('login-user').value.trim().toLowerCase();
+      const pass = document.getElementById('login-pass').value;
+
+      btn.disabled = true;
+      errorEl.textContent = '';
+
+      try {
+        const res = await fetch('/api/login', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ user, pass }),
+        });
+
+        if (res.ok) {
+          window.location.href = '/';
+        } else {
+          errorEl.textContent = 'Usuario o contraseña incorrectos';
+          document.getElementById('login-pass').value = '';
+          btn.disabled = false;
+        }
+      } catch {
+        errorEl.textContent = 'Error de conexión. Inténtalo de nuevo.';
+        btn.disabled = false;
+      }
+    });
+  </script>
+
+</body>
+</html>

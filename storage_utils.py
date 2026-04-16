@@ -14,7 +14,7 @@ def upload_html_to_gcs(html: str, filename: str) -> str:
     blob = bucket.blob(f"{PREFIX}{filename}")
     blob.upload_from_string(html, content_type="text/html")
 
-    return f"https://storage.googleapis.com/{BUCKET_NAME}/{blob.name}"
+    return f"https://storage.googleapis.com/{BUCKET_NAME}/{blob.name}?authuser=1"
 
 
 def list_informes_from_gcs() -> dict:
@@ -28,7 +28,7 @@ def list_informes_from_gcs() -> dict:
                 {
                     "name": blob.name.split("/")[-1],
                     "path": blob.name,
-                    "url": f"https://storage.googleapis.com/{BUCKET_NAME}/{blob.name}",
+                    "url": f"https://storage.googleapis.com/{BUCKET_NAME}/{blob.name}?authuser=1",
                     "size": blob.size,
                     "created": blob.time_created.isoformat() if blob.time_created else None,
                     "updated": blob.updated.isoformat() if blob.updated else None,
