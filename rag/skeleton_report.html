@@ -1,0 +1,179 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>{{report_title}}</title>
+<link href="https://fonts.googleapis.com/css2?family=Host+Grotesk:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+<script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.4/dist/chart.umd.min.js"></script>
+<style>
+  :root {
+    --st-bg: #f3f3f3;
+    --st-blue: #7998ae;
+    --st-red: #fe3f3c;
+    --st-dark: #1a1a2e;
+    --st-white: #ffffff;
+    --st-gray: #6b7280;
+    --radius: 16px;
+    --shadow: 0 4px 24px rgba(0,0,0,.06);
+  }
+  * { margin:0; padding:0; box-sizing:border-box; }
+  body {
+    font-family: 'Host Grotesk', system-ui, -apple-system, sans-serif;
+    background: var(--st-bg);
+    color: var(--st-dark);
+    line-height: 1.6;
+  }
+  .cover {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    min-height: 100vh;
+  }
+  .cover-left {
+    background: var(--st-dark);
+    color: var(--st-white);
+    padding: 80px 64px;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+  }
+  .cover-left h1 {
+    font-size: 52px;
+    font-weight: 800;
+    line-height: 1.08;
+    margin-bottom: 20px;
+  }
+  .cover-left h1 span { color: var(--st-blue); }
+  .cover-left .subtitle {
+    font-size: 18px;
+    color: rgba(255,255,255,.7);
+    max-width: 520px;
+  }
+  .cover-right {
+    background: var(--st-blue);
+    color: var(--st-white);
+    padding: 80px 64px;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+  }
+  .big-score {
+    font-size: 120px;
+    font-weight: 800;
+    line-height: 1;
+  }
+  .verdict {
+    margin-top: 12px;
+    font-size: 22px;
+    font-weight: 600;
+  }
+  .container {
+    max-width: 1200px;
+    margin: 0 auto;
+    padding: 0 32px;
+  }
+  .section {
+    padding: 80px 0;
+  }
+  .section h2 {
+    font-size: 36px;
+    font-weight: 800;
+    margin-bottom: 20px;
+  }
+  .white-card {
+    background: #fff;
+    border-radius: var(--radius);
+    box-shadow: var(--shadow);
+    padding: 32px;
+  }
+  .list-block ul {
+    padding-left: 20px;
+  }
+  .list-block li {
+    margin-bottom: 10px;
+  }
+  .footer {
+    background: var(--st-dark);
+    color: rgba(255,255,255,.6);
+    text-align: center;
+    padding: 40px;
+  }
+</style>
+</head>
+<body>
+
+<section class="cover">
+  <div class="cover-left">
+    <div>Informe AEO + SEO Experto</div>
+    <h1>{{brand_name}}<br><span>{{brand_highlight}}</span></h1>
+    <p class="subtitle">{{subtitle}}</p>
+    <div style="margin-top:40px;">
+      <div>Sector: <strong>{{sector}}</strong></div>
+      <div>Mercado: <strong>{{market}}</strong></div>
+      <div>Servicios: <strong>{{services}}</strong></div>
+      <div>Fecha: <strong>{{report_date}}</strong></div>
+    </div>
+  </div>
+  <div class="cover-right">
+    <div style="font-size:13px; letter-spacing:2px; text-transform:uppercase;">Puntuación media global</div>
+    <div class="big-score">{{score_global}}<sup>/100</sup></div>
+    <div class="verdict">{{score_label}}</div>
+    <div style="margin-top:40px; width:100%;">
+      {{llm_score_cards_html}}
+    </div>
+  </div>
+</section>
+
+<section class="section">
+  <div class="container">
+    <h2>Resumen ejecutivo</h2>
+    <div class="white-card">
+      <p>{{summary_html}}</p>
+    </div>
+  </div>
+</section>
+
+<section class="section" style="background:#fff;">
+  <div class="container">
+    <h2>Fortalezas</h2>
+    <div class="white-card list-block">
+      {{strengths_html}}
+    </div>
+  </div>
+</section>
+
+<section class="section">
+  <div class="container">
+    <h2>Debilidades</h2>
+    <div class="white-card list-block">
+      {{weaknesses_html}}
+    </div>
+  </div>
+</section>
+
+<section class="section" style="background:#fff;">
+  <div class="container">
+    <h2>Recomendaciones</h2>
+    <div class="white-card list-block">
+      {{recommendations_html}}
+    </div>
+  </div>
+</section>
+
+<section class="section">
+  <div class="container">
+    <h2>Lectura estratégica</h2>
+    <div class="white-card">
+      {{strategic_analysis_html}}
+    </div>
+  </div>
+</section>
+
+<footer class="footer">
+  <div><strong>Sun Tzu Growth</strong></div>
+  <div>{{footer_text}}</div>
+</footer>
+
+</body>
+</html>

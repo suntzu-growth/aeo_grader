@@ -1,16 +1,5 @@
 from __future__ import annotations
-
-"""
-Google Search Console Tool
---------------------------
-Consulta la Search Console API y devuelve datos de rendimiento
-(clicks, impresiones, CTR, posición) para una propiedad dada.
-
-Requisitos previos:
-  1. credentials.json en la raíz del proyecto (OAuth2 client secret de GCP)
-  2. Search Console API habilitada en ese proyecto GCP
-  3. Primera ejecución: abre el navegador para el flujo OAuth → genera token.json
-"""
+from typing import Any
 
 import json
 import os
@@ -22,13 +11,12 @@ from google_auth_oauthlib.flow import InstalledAppFlow
 from google.auth.transport.requests import Request
 from googleapiclient.discovery import build
 
-# ── Configuración ──────────────────────────────────────────────────────────────
-
+# Configuración 
 SCOPES = ["https://www.googleapis.com/auth/webmasters.readonly"]
 CREDENTIALS_FILE = os.getenv("GSC_CREDENTIALS_FILE", "credentials.json")
 TOKEN_FILE = os.getenv("GSC_TOKEN_FILE", "token.json")
 
-# ── Auth ───────────────────────────────────────────────────────────────────────
+# Auth 
 
 def _get_gsc_service():
     """Devuelve un cliente autenticado de la Search Console API."""
@@ -55,7 +43,7 @@ def _get_gsc_service():
     return build("searchconsole", "v1", credentials=creds)
 
 
-# ── Tool principal ─────────────────────────────────────────────────────────────
+# Tool principal 
 
 async def buscar_gsc(input_data: str) -> str:
     """
@@ -120,3 +108,29 @@ async def buscar_gsc(input_data: str) -> str:
             },
             ensure_ascii=False,
         )
+
+async def tool_gsc_node(state: dict[str, Any]) -> dict[str, Any]:
+    input_data = state.get("input_data")
+
+    if not input_data:
+        state["gsc_data"] = None
+        state["status"] = "error"
+        state["response_msg"] = "Falta `input_data` en el subestado GSC."
+        return state
+
+    raw_result = await buscar_gsc(input_data)
+
+    try:
+        gsc_data = json.loads(raw_result)
+    except Exception:
+        gsc_data = {
+            "status": "error",
+            "message": "La tool GSC devolvió una respuesta no parseable.",
+            "raw_output": raw_result,
+        }
+
+    state["gsc_data"] = gsc_data
+    state["status"] = gsc_data.get("status", "error")
+    state["response_msg"] = gsc_data.get("message", "Consulta GSC ejecutada.")
+
+    return state

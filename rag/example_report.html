@@ -1,0 +1,975 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>IESE Business School — Informe AEO & Análisis SEO Experto | Sun Tzu</title>
+<link href="https://fonts.googleapis.com/css2?family=Host+Grotesk:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+<script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.4/dist/chart.umd.min.js"></script>
+<style>
+  :root {
+    --st-bg: #f3f3f3;
+    --st-blue: #7998ae;
+    --st-blue-dark: #5a7a91;
+    --st-red: #fe3f3c;
+    --st-red-dark: #d9302e;
+    --st-dark: #1a1a2e;
+    --st-dark2: #16213e;
+    --st-white: #ffffff;
+    --st-gray: #6b7280;
+    --st-light-gray: #e5e7eb;
+    --st-green: #10b981;
+    --st-amber: #f59e0b;
+    --radius: 16px;
+    --shadow: 0 4px 24px rgba(0,0,0,.06);
+    --shadow-lg: 0 12px 48px rgba(0,0,0,.10);
+  }
+  * { margin:0; padding:0; box-sizing:border-box; }
+  body {
+    font-family: 'Host Grotesk', system-ui, -apple-system, sans-serif;
+    background: var(--st-bg);
+    color: var(--st-dark);
+    line-height: 1.6;
+    -webkit-font-smoothing: antialiased;
+  }
+
+  /* ── COVER ── */
+  .cover {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    min-height: 100vh;
+  }
+  .cover-left {
+    background: var(--st-dark);
+    color: var(--st-white);
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    padding: 80px 64px;
+    position: relative;
+    overflow: hidden;
+  }
+  .cover-left::before {
+    content: '';
+    position: absolute;
+    top: -100px; right: -100px;
+    width: 400px; height: 400px;
+    background: radial-gradient(circle, rgba(121,152,174,.15) 0%, transparent 70%);
+    border-radius: 50%;
+  }
+  .cover-left::after {
+    content: '';
+    position: absolute;
+    bottom: -80px; left: -80px;
+    width: 300px; height: 300px;
+    background: radial-gradient(circle, rgba(254,63,60,.08) 0%, transparent 70%);
+    border-radius: 50%;
+  }
+  .cover-left .tag {
+    display: inline-block;
+    background: var(--st-red);
+    color: var(--st-white);
+    font-size: 11px;
+    font-weight: 700;
+    letter-spacing: 2px;
+    text-transform: uppercase;
+    padding: 6px 16px;
+    border-radius: 4px;
+    margin-bottom: 32px;
+    position: relative;
+    z-index: 1;
+  }
+  .cover-left h1 {
+    font-size: 52px;
+    font-weight: 800;
+    line-height: 1.08;
+    margin-bottom: 20px;
+    position: relative;
+    z-index: 1;
+  }
+  .cover-left h1 span { color: var(--st-blue); }
+  .cover-left .subtitle {
+    font-size: 18px;
+    color: rgba(255,255,255,.6);
+    font-weight: 400;
+    max-width: 440px;
+    position: relative;
+    z-index: 1;
+  }
+  .cover-left .meta {
+    margin-top: 48px;
+    display: flex;
+    gap: 32px;
+    position: relative;
+    z-index: 1;
+  }
+  .cover-left .meta-item {
+    font-size: 12px;
+    color: rgba(255,255,255,.4);
+    text-transform: uppercase;
+    letter-spacing: 1px;
+  }
+  .cover-left .meta-item strong {
+    display: block;
+    color: var(--st-white);
+    font-size: 14px;
+    font-weight: 600;
+    margin-top: 4px;
+    text-transform: none;
+    letter-spacing: 0;
+  }
+  .cover-right {
+    background: var(--st-blue);
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    padding: 80px 64px;
+    position: relative;
+    overflow: hidden;
+  }
+  .cover-right::before {
+    content: '';
+    position: absolute;
+    inset: 0;
+    background: repeating-linear-gradient(
+      45deg,
+      transparent,
+      transparent 40px,
+      rgba(255,255,255,.03) 40px,
+      rgba(255,255,255,.03) 80px
+    );
+  }
+  .score-hero {
+    position: relative;
+    z-index: 1;
+    text-align: center;
+  }
+  .score-hero .label {
+    font-size: 13px;
+    font-weight: 600;
+    letter-spacing: 2px;
+    text-transform: uppercase;
+    color: rgba(255,255,255,.7);
+    margin-bottom: 16px;
+  }
+  .score-hero .big-score {
+    font-size: 140px;
+    font-weight: 800;
+    color: var(--st-white);
+    line-height: 1;
+    text-shadow: 0 4px 40px rgba(0,0,0,.15);
+  }
+  .score-hero .big-score sup {
+    font-size: 48px;
+    font-weight: 400;
+    vertical-align: super;
+    opacity: .5;
+  }
+  .score-hero .verdict {
+    margin-top: 12px;
+    font-size: 22px;
+    font-weight: 600;
+    color: var(--st-white);
+    background: rgba(255,255,255,.15);
+    backdrop-filter: blur(8px);
+    padding: 8px 28px;
+    border-radius: 40px;
+    display: inline-block;
+  }
+  .llm-pills {
+    display: flex;
+    gap: 16px;
+    margin-top: 48px;
+    position: relative;
+    z-index: 1;
+  }
+  .llm-pill {
+    background: rgba(255,255,255,.12);
+    backdrop-filter: blur(8px);
+    border: 1px solid rgba(255,255,255,.15);
+    border-radius: 12px;
+    padding: 16px 20px;
+    text-align: center;
+    min-width: 120px;
+    transition: transform .2s;
+  }
+  .llm-pill:hover { transform: translateY(-4px); }
+  .llm-pill .name {
+    font-size: 12px;
+    font-weight: 600;
+    color: rgba(255,255,255,.7);
+    margin-bottom: 6px;
+  }
+  .llm-pill .pill-score {
+    font-size: 36px;
+    font-weight: 800;
+    color: var(--st-white);
+  }
+
+  /* ── CONTAINER ── */
+  .container {
+    max-width: 1200px;
+    margin: 0 auto;
+    padding: 0 32px;
+  }
+
+  /* ── SECTION ── */
+  .section {
+    padding: 80px 0;
+  }
+  .section-header {
+    margin-bottom: 48px;
+  }
+  .section-header .section-tag {
+    display: inline-block;
+    font-size: 11px;
+    font-weight: 700;
+    letter-spacing: 2px;
+    text-transform: uppercase;
+    color: var(--st-red);
+    margin-bottom: 12px;
+  }
+  .section-header h2 {
+    font-size: 36px;
+    font-weight: 800;
+    line-height: 1.15;
+    color: var(--st-dark);
+  }
+  .section-header h2 span { color: var(--st-blue); }
+  .section-header p {
+    font-size: 16px;
+    color: var(--st-gray);
+    margin-top: 12px;
+    max-width: 640px;
+  }
+
+  /* ── CARDS GRID ── */
+  .cards-grid {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 24px;
+  }
+  .card {
+    background: var(--st-white);
+    border-radius: var(--radius);
+    padding: 32px;
+    box-shadow: var(--shadow);
+    border: 1px solid rgba(0,0,0,.04);
+    transition: transform .2s, box-shadow .2s;
+  }
+  .card:hover {
+    transform: translateY(-4px);
+    box-shadow: var(--shadow-lg);
+  }
+  .card-icon {
+    width: 48px; height: 48px;
+    border-radius: 12px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 22px;
+    margin-bottom: 20px;
+  }
+  .card-icon.blue { background: rgba(121,152,174,.12); color: var(--st-blue); }
+  .card-icon.red { background: rgba(254,63,60,.10); color: var(--st-red); }
+  .card-icon.green { background: rgba(16,185,129,.10); color: var(--st-green); }
+  .card-icon.amber { background: rgba(245,158,11,.10); color: var(--st-amber); }
+  .card h3 {
+    font-size: 16px;
+    font-weight: 700;
+    margin-bottom: 6px;
+  }
+  .card .card-score {
+    font-size: 28px;
+    font-weight: 800;
+    margin-bottom: 8px;
+  }
+  .card .card-max {
+    font-size: 14px;
+    font-weight: 400;
+    color: var(--st-gray);
+  }
+  .card p {
+    font-size: 14px;
+    color: var(--st-gray);
+    line-height: 1.5;
+  }
+
+  /* ── PROGRESS BARS ── */
+  .progress-wrap { margin-top: 12px; }
+  .progress-bar-bg {
+    width: 100%;
+    height: 8px;
+    background: var(--st-light-gray);
+    border-radius: 4px;
+    overflow: hidden;
+  }
+  .progress-bar-fill {
+    height: 100%;
+    border-radius: 4px;
+    transition: width 1.2s cubic-bezier(.4,0,.2,1);
+  }
+  .fill-blue { background: var(--st-blue); }
+  .fill-red { background: var(--st-red); }
+  .fill-green { background: var(--st-green); }
+  .fill-amber { background: var(--st-amber); }
+
+  /* ── LLM COMPARISON TABLE ── */
+  .comparison-table {
+    width: 100%;
+    border-collapse: separate;
+    border-spacing: 0;
+    background: var(--st-white);
+    border-radius: var(--radius);
+    overflow: hidden;
+    box-shadow: var(--shadow);
+  }
+  .comparison-table thead th {
+    background: var(--st-dark);
+    color: var(--st-white);
+    font-size: 12px;
+    font-weight: 700;
+    letter-spacing: 1px;
+    text-transform: uppercase;
+    padding: 16px 20px;
+    text-align: center;
+  }
+  .comparison-table thead th:first-child { text-align: left; }
+  .comparison-table tbody td {
+    padding: 18px 20px;
+    text-align: center;
+    font-size: 15px;
+    font-weight: 600;
+    border-bottom: 1px solid var(--st-light-gray);
+  }
+  .comparison-table tbody td:first-child {
+    text-align: left;
+    font-weight: 500;
+    color: var(--st-gray);
+  }
+  .comparison-table tbody tr:last-child td { border-bottom: none; }
+  .comparison-table tbody tr:hover { background: rgba(121,152,174,.04); }
+  .badge {
+    display: inline-block;
+    padding: 4px 12px;
+    border-radius: 20px;
+    font-size: 13px;
+    font-weight: 700;
+  }
+  .badge-high { background: rgba(16,185,129,.1); color: var(--st-green); }
+  .badge-mid { background: rgba(245,158,11,.1); color: var(--st-amber); }
+  .badge-low { background: rgba(254,63,60,.1); color: var(--st-red); }
+
+  /* ── RADAR / CHART CONTAINERS ── */
+  .chart-container {
+    background: var(--st-white);
+    border-radius: var(--radius);
+    padding: 32px;
+    box-shadow: var(--shadow);
+    border: 1px solid rgba(0,0,0,.04);
+  }
+  .chart-container h3 {
+    font-size: 18px;
+    font-weight: 700;
+    margin-bottom: 24px;
+  }
+  .chart-wrapper {
+    position: relative;
+    width: 100%;
+    height: 320px;
+  }
+  .charts-row {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 24px;
+  }
+
+  /* ── EXPERT ANALYSIS ── */
+  .analysis-block {
+    background: var(--st-white);
+    border-radius: var(--radius);
+    padding: 40px;
+    box-shadow: var(--shadow);
+    border-left: 4px solid var(--st-red);
+    margin-bottom: 24px;
+  }
+  .analysis-block h3 {
+    font-size: 20px;
+    font-weight: 700;
+    margin-bottom: 16px;
+    display: flex;
+    align-items: center;
+    gap: 10px;
+  }
+  .analysis-block h3 .num {
+    background: var(--st-red);
+    color: var(--st-white);
+    width: 32px; height: 32px;
+    border-radius: 8px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 14px;
+    font-weight: 800;
+    flex-shrink: 0;
+  }
+  .analysis-block p {
+    font-size: 15px;
+    color: #374151;
+    line-height: 1.7;
+    margin-bottom: 12px;
+  }
+  .analysis-block .highlight {
+    background: rgba(121,152,174,.08);
+    border-radius: 8px;
+    padding: 16px 20px;
+    margin-top: 16px;
+    font-size: 14px;
+    color: var(--st-dark);
+    border-left: 3px solid var(--st-blue);
+  }
+  .analysis-block .highlight strong { color: var(--st-blue); }
+
+  /* ── VERDICT BANNER ── */
+  .verdict-banner {
+    background: linear-gradient(135deg, var(--st-dark) 0%, var(--st-dark2) 100%);
+    color: var(--st-white);
+    border-radius: var(--radius);
+    padding: 48px;
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 48px;
+    align-items: center;
+    box-shadow: var(--shadow-lg);
+  }
+  .verdict-banner h3 {
+    font-size: 28px;
+    font-weight: 800;
+    margin-bottom: 16px;
+  }
+  .verdict-banner h3 span { color: var(--st-red); }
+  .verdict-banner p {
+    font-size: 15px;
+    color: rgba(255,255,255,.6);
+    line-height: 1.7;
+  }
+  .kpi-row {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 16px;
+  }
+  .kpi-box {
+    background: rgba(255,255,255,.06);
+    border: 1px solid rgba(255,255,255,.08);
+    border-radius: 12px;
+    padding: 20px;
+    text-align: center;
+  }
+  .kpi-box .kpi-val {
+    font-size: 32px;
+    font-weight: 800;
+    color: var(--st-white);
+  }
+  .kpi-box .kpi-label {
+    font-size: 11px;
+    font-weight: 600;
+    color: rgba(255,255,255,.4);
+    text-transform: uppercase;
+    letter-spacing: 1px;
+    margin-top: 4px;
+  }
+
+  /* ── ACTION ITEMS ── */
+  .action-grid {
+    display: grid;
+    grid-template-columns: repeat(2, 1fr);
+    gap: 24px;
+  }
+  .action-card {
+    background: var(--st-white);
+    border-radius: var(--radius);
+    padding: 32px;
+    box-shadow: var(--shadow);
+    border-top: 4px solid var(--st-blue);
+    transition: transform .2s;
+  }
+  .action-card:hover { transform: translateY(-4px); }
+  .action-card .priority {
+    display: inline-block;
+    font-size: 10px;
+    font-weight: 700;
+    letter-spacing: 1.5px;
+    text-transform: uppercase;
+    padding: 4px 10px;
+    border-radius: 4px;
+    margin-bottom: 12px;
+  }
+  .priority-critical { background: rgba(254,63,60,.1); color: var(--st-red); }
+  .priority-high { background: rgba(245,158,11,.1); color: var(--st-amber); }
+  .priority-medium { background: rgba(121,152,174,.1); color: var(--st-blue); }
+  .action-card h4 {
+    font-size: 17px;
+    font-weight: 700;
+    margin-bottom: 8px;
+  }
+  .action-card p {
+    font-size: 14px;
+    color: var(--st-gray);
+    line-height: 1.6;
+  }
+
+  /* ── FOOTER ── */
+  .footer {
+    background: var(--st-dark);
+    color: rgba(255,255,255,.4);
+    text-align: center;
+    padding: 40px;
+    font-size: 13px;
+  }
+  .footer a { color: var(--st-blue); text-decoration: none; }
+  .footer .logo-text {
+    font-size: 18px;
+    font-weight: 800;
+    color: var(--st-white);
+    margin-bottom: 8px;
+  }
+
+  /* ── RESPONSIVE ── */
+  @media (max-width: 900px) {
+    .cover { grid-template-columns: 1fr; }
+    .cover-left { padding: 48px 32px; }
+    .cover-left h1 { font-size: 36px; }
+    .cover-right { padding: 48px 32px; }
+    .score-hero .big-score { font-size: 96px; }
+    .llm-pills { flex-direction: column; }
+    .cards-grid { grid-template-columns: 1fr; }
+    .charts-row { grid-template-columns: 1fr; }
+    .action-grid { grid-template-columns: 1fr; }
+    .verdict-banner { grid-template-columns: 1fr; }
+    .kpi-row { grid-template-columns: repeat(3, 1fr); }
+    .comparison-table { font-size: 13px; }
+  }
+</style>
+</head>
+<body>
+
+<!-- ═══════════════ COVER ═══════════════ -->
+<section class="cover">
+  <div class="cover-left">
+    <div class="tag">Informe AEO + SEO Experto</div>
+    <h1>IESE<br><span>Business School</span></h1>
+    <p class="subtitle">Visibilidad de marca en motores de IA — Análisis de Answer Engine Optimization con diagnóstico estratégico SEO para el sector Educación en España.</p>
+    <div class="meta">
+      <div class="meta-item">Sector<strong>Educación</strong></div>
+      <div class="meta-item">Mercado<strong>Spain</strong></div>
+      <div class="meta-item">Servicios<strong>Cursos y formación</strong></div>
+      <div class="meta-item">Fecha<strong>Abril 2026</strong></div>
+    </div>
+  </div>
+  <div class="cover-right">
+    <div class="score-hero">
+      <div class="label">Puntuación Media Global</div>
+      <div class="big-score">77<sup>/100</sup></div>
+      <div class="verdict">Genial</div>
+    </div>
+    <div class="llm-pills">
+      <div class="llm-pill">
+        <div class="name">ChatGPT</div>
+        <div class="pill-score">77</div>
+      </div>
+      <div class="llm-pill">
+        <div class="name">Perplexity</div>
+        <div class="pill-score">85</div>
+      </div>
+      <div class="llm-pill">
+        <div class="name">Gemini</div>
+        <div class="pill-score">70</div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ═══════════════ RESUMEN POR LLM ═══════════════ -->
+<section class="section">
+  <div class="container">
+    <div class="section-header">
+      <div class="section-tag">Datos HubSpot AEO Grader</div>
+      <h2>Resultados por <span>proveedor de LLM</span></h2>
+      <p>Calificación de IESE en 3 motores de IA: ChatGPT (GPT-4o), Perplexity (Sonar) y Gemini 2.0 Flash, evaluando 5 dimensiones clave.</p>
+    </div>
+
+    <table class="comparison-table">
+      <thead>
+        <tr>
+          <th>Dimensión</th>
+          <th>Peso</th>
+          <th>ChatGPT</th>
+          <th>Perplexity</th>
+          <th>Gemini</th>
+          <th>Media</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr>
+          <td>Reconocimiento de marca</td>
+          <td>/20</td>
+          <td><span class="badge badge-high">15</span></td>
+          <td><span class="badge badge-high">17</span></td>
+          <td><span class="badge badge-mid">13</span></td>
+          <td><strong>15.0</strong></td>
+        </tr>
+        <tr>
+          <td>Posición en el mercado</td>
+          <td>/10</td>
+          <td><span class="badge badge-low">3</span></td>
+          <td><span class="badge badge-high">7</span></td>
+          <td><span class="badge badge-low">3</span></td>
+          <td><strong>4.3</strong></td>
+        </tr>
+        <tr>
+          <td>Calidad de la presencia</td>
+          <td>/20</td>
+          <td><span class="badge badge-high">17</span></td>
+          <td><span class="badge badge-high">17</span></td>
+          <td><span class="badge badge-mid">13</span></td>
+          <td><strong>15.7</strong></td>
+        </tr>
+        <tr>
+          <td>Percepción de marca</td>
+          <td>/40</td>
+          <td><span class="badge badge-high">35</span></td>
+          <td><span class="badge badge-high">37</span></td>
+          <td><span class="badge badge-high">34</span></td>
+          <td><strong>35.3</strong></td>
+        </tr>
+        <tr>
+          <td>Cuota de participación</td>
+          <td>/10</td>
+          <td><span class="badge badge-high">7</span></td>
+          <td><span class="badge badge-high">7</span></td>
+          <td><span class="badge badge-high">7</span></td>
+          <td><strong>7.0</strong></td>
+        </tr>
+        <tr style="background:rgba(121,152,174,.06);">
+          <td><strong style="color:var(--st-dark);">TOTAL</strong></td>
+          <td><strong>/100</strong></td>
+          <td><strong style="font-size:18px;">77</strong></td>
+          <td><strong style="font-size:18px; color:var(--st-green);">85</strong></td>
+          <td><strong style="font-size:18px; color:var(--st-amber);">70</strong></td>
+          <td><strong style="font-size:18px;">77.3</strong></td>
+        </tr>
+      </tbody>
+    </table>
+  </div>
+</section>
+
+<!-- ═══════════════ DESGLOSE VISUAL ═══════════════ -->
+<section class="section" style="background:var(--st-white); padding-top:60px; padding-bottom:60px;">
+  <div class="container">
+    <div class="section-header">
+      <div class="section-tag">Desglose Visual</div>
+      <h2>Rendimiento por <span>dimensión</span></h2>
+    </div>
+    <div class="cards-grid">
+      <!-- Reconocimiento -->
+      <div class="card">
+        <div class="card-icon blue">🏷️</div>
+        <h3>Reconocimiento de marca</h3>
+        <div class="card-score" style="color:var(--st-blue);">15.0 <span class="card-max">/ 20</span></div>
+        <div class="progress-wrap">
+          <div class="progress-bar-bg"><div class="progress-bar-fill fill-blue" style="width:75%;"></div></div>
+        </div>
+        <p style="margin-top:12px;">Visibilidad alta en ChatGPT y Perplexity. Gemini muestra menor reconocimiento, lo que indica que Google aún no indexa toda la marca con la misma profundidad.</p>
+      </div>
+      <!-- Posición -->
+      <div class="card">
+        <div class="card-icon red">📍</div>
+        <h3>Posición en el mercado</h3>
+        <div class="card-score" style="color:var(--st-red);">4.3 <span class="card-max">/ 10</span></div>
+        <div class="progress-wrap">
+          <div class="progress-bar-bg"><div class="progress-bar-fill fill-red" style="width:43%;"></div></div>
+        </div>
+        <p style="margin-top:12px;">El punto más débil del informe. Solo Perplexity posiciona a IESE como referente claro. ChatGPT y Gemini no la categorizan como líder indiscutible del sector educativo en España.</p>
+      </div>
+      <!-- Calidad -->
+      <div class="card">
+        <div class="card-icon blue">✨</div>
+        <h3>Calidad de la presencia</h3>
+        <div class="card-score" style="color:var(--st-blue);">15.7 <span class="card-max">/ 20</span></div>
+        <div class="progress-wrap">
+          <div class="progress-bar-bg"><div class="progress-bar-fill fill-blue" style="width:78%;"></div></div>
+        </div>
+        <p style="margin-top:12px;">La información que los LLMs encuentran sobre IESE es rica y relevante en ChatGPT/Perplexity, pero Gemini presenta un déficit de 4 puntos que penaliza la media.</p>
+      </div>
+      <!-- Percepción -->
+      <div class="card">
+        <div class="card-icon green">💚</div>
+        <h3>Percepción de marca</h3>
+        <div class="card-score" style="color:var(--st-green);">35.3 <span class="card-max">/ 40</span></div>
+        <div class="progress-wrap">
+          <div class="progress-bar-bg"><div class="progress-bar-fill fill-green" style="width:88%;"></div></div>
+        </div>
+        <p style="margin-top:12px;">La dimensión más fuerte. El sentimiento hacia IESE es consistentemente positivo en los 3 motores de IA. La reputación académica y el prestigio de marca son sólidos.</p>
+      </div>
+      <!-- Share of Voice -->
+      <div class="card">
+        <div class="card-icon amber">📢</div>
+        <h3>Cuota de participación</h3>
+        <div class="card-score" style="color:var(--st-amber);">7.0 <span class="card-max">/ 10</span></div>
+        <div class="progress-wrap">
+          <div class="progress-bar-bg"><div class="progress-bar-fill fill-amber" style="width:70%;"></div></div>
+        </div>
+        <p style="margin-top:12px;">Share of Voice estable y uniforme en los 3 LLMs (7/10). Buena presencia, pero hay un 30% de cuota que capturan competidores como IE, ESADE o escuelas internacionales.</p>
+      </div>
+      <!-- GAP Score -->
+      <div class="card" style="border: 2px dashed var(--st-red);">
+        <div class="card-icon red">🎯</div>
+        <h3>GAP: Puntos perdidos</h3>
+        <div class="card-score" style="color:var(--st-red);">22.7 <span class="card-max">puntos</span></div>
+        <div class="progress-wrap">
+          <div class="progress-bar-bg"><div class="progress-bar-fill fill-red" style="width:22.7%;"></div></div>
+        </div>
+        <p style="margin-top:12px;">De los 22.7 puntos perdidos, 5.7 provienen de Posición en el Mercado (el 25% del gap) y 8.7 de Gemini como plataforma (el 38% del gap total).</p>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ═══════════════ CHARTS ═══════════════ -->
+<section class="section">
+  <div class="container">
+    <div class="section-header">
+      <div class="section-tag">Visualización</div>
+      <h2>Comparativa <span>radar y barras</span></h2>
+    </div>
+    <div class="charts-row">
+      <div class="chart-container">
+        <h3>Radar por LLM</h3>
+        <div class="chart-wrapper">
+          <canvas id="radarChart"></canvas>
+        </div>
+      </div>
+      <div class="chart-container">
+        <h3>Puntuación global por motor de IA</h3>
+        <div class="chart-wrapper">
+          <canvas id="barChart"></canvas>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ═══════════════ ANÁLISIS EXPERTO SEO ═══════════════ -->
+<section class="section" style="background:var(--st-white);">
+  <div class="container">
+    <div class="section-header">
+      <div class="section-tag">Análisis experto</div>
+      <h2>Diagnóstico <span>SEO & AEO</span> estratégico</h2>
+      <p>Análisis con criterio de consultoría de crecimiento para IESE Business School en el contexto de la búsqueda con IA.</p>
+    </div>
+
+    <!-- Bloque 1 -->
+    <div class="analysis-block">
+      <h3><span class="num">1</span> La Posición en el Mercado es el cuello de botella crítico</h3>
+      <p>Con una media de solo 4.3/10, la Posición en el Mercado es la dimensión que más lastra la calificación global de IESE. Esto significa que ChatGPT y Gemini no están categorizando a IESE de forma consistente como "Líder" del sector educativo en España, sino probablemente como "Retadora" o incluso "Jugadora de nicho".</p>
+      <p>Esto es paradójico para una escuela #2 en Europa y #4 mundial según el FT. El problema no es de reputación real, sino de <strong>representación en los datos de entrenamiento de los LLMs</strong>. Los motores de IA construyen su percepción de posición de mercado a partir de señales como: cuota de menciones en medios especializados vs. competidores, presencia en datasets de comparativas educativas, y estructura de datos de la web.</p>
+      <div class="highlight"><strong>Acción SEO/AEO:</strong> Crear contenido de tipo "comparativa de escuelas de negocio" y publicarlo en medios de autoridad donde IESE aparezca explícitamente como líder. Implementar schema markup de tipo EducationalOrganization con datos estructurados que refuercen el posicionamiento (rankings, acreditaciones, datos de empleabilidad).</div>
+    </div>
+
+    <!-- Bloque 2 -->
+    <div class="analysis-block">
+      <h3><span class="num">2</span> Gemini es el eslabón débil: el problema de Google</h3>
+      <p>IESE obtiene 85 en Perplexity pero solo 70 en Gemini, una diferencia de 15 puntos. Gemini se alimenta directamente del índice de Google y del Knowledge Graph, lo que sugiere que la web de IESE tiene deficiencias técnicas de SEO que afectan cómo Google comprende y estructura la información de la marca.</p>
+      <p>Los 4 puntos perdidos en "Calidad de la presencia" en Gemini (13 vs. 17) indican que Google no está encontrando información tan rica, estructurada ni fiable como los otros motores. Esto suele deberse a: falta de datos estructurados (schema.org), contenido duplicado entre iese.edu y subdominios, thin content en páginas clave de programas, o arquitectura de enlaces internos deficiente.</p>
+      <div class="highlight"><strong>Acción SEO/AEO:</strong> Auditar el sitio iese.edu con foco en: implementación de JSON-LD (Course, EducationalOrganization, Review, FAQ), optimización del sitemap XML, resolución de contenido duplicado entre versiones idiomáticas (hreflang), y refuerzo del interlinking entre páginas de programas y la home. También conviene verificar si Google está indexando correctamente las páginas de alumni, testimonios y datos de empleabilidad, que son señales de autoridad clave.</div>
+    </div>
+
+    <!-- Bloque 3 -->
+    <div class="analysis-block">
+      <h3><span class="num">3</span> Percepción de marca es el gran activo: proteger y amplificar</h3>
+      <p>Con 35.3/40 (88% de eficiencia), la percepción de marca es la fortaleza absoluta de IESE en el ecosistema AEO. Los tres motores de IA transmiten un sentimiento consistentemente positivo. Esto refleja décadas de reputación académica, presencia en rankings internacionales y una red de alumni influyente.</p>
+      <p>Sin embargo, este activo es frágil en el contexto de IA. Una crisis reputacional, un ranking desfavorable o una narrativa negativa amplificada puede impactar directamente en cómo los LLMs sintetizan la percepción de la marca en sus respuestas. A diferencia del SEO tradicional donde puedes "empujar" resultados negativos hacia abajo, en AEO no tienes control directo sobre la respuesta generada.</p>
+      <div class="highlight"><strong>Acción SEO/AEO:</strong> Establecer un programa de Digital PR continuo que genere menciones positivas en fuentes de alta autoridad. Publicar cases studies de alumni, datos de impacto económico y social, y contenido thought leadership del claustro en medios indexados por los LLMs. Crear una estrategia de "narrative seeding" donde las asociaciones temáticas clave (innovación, liderazgo, impacto global) aparezcan recurrentemente ligadas a IESE.</div>
+    </div>
+
+    <!-- Bloque 4 -->
+    <div class="analysis-block">
+      <h3><span class="num">4</span> Share of Voice estable pero no dominante: la amenaza de IE y ESADE</h3>
+      <p>Un 7/10 uniforme en los tres LLMs indica que IESE mantiene una cuota de voz sólida pero no dominante. Cuando un usuario pregunta a un motor de IA por "mejores escuelas de negocio en España" o "cursos de formación ejecutiva", IESE aparece mencionada, pero comparte protagonismo con IE Business School, ESADE y potencialmente escuelas internacionales (INSEAD, LBS).</p>
+      <p>El riesgo aquí es que el Share of Voice en IA es mucho más "winner takes most" que en SEO tradicional. En Google, aparecer en posiciones 1-3 ya es excelente. Pero cuando un LLM responde recomendando una escuela, suele dar 1-2 opciones prominentes y mencionar el resto de pasada. Si un competidor invierte en AEO antes, IESE podría perder terreno rápidamente.</p>
+      <div class="highlight"><strong>Acción SEO/AEO:</strong> Crear "content moats" (fosos de contenido) en las queries donde IESE debe dominar: "mejor MBA España", "formación ejecutiva Barcelona", "escuela de negocios liderazgo". Desarrollar assets de contenido especializados (herramientas interactivas, calculadoras de ROI del MBA, guías definitivas) que los LLMs identifiquen como fuentes autorizadas. Considerar una estrategia de respuesta directa en Perplexity Pages.</div>
+    </div>
+
+    <!-- Bloque 5 -->
+    <div class="analysis-block">
+      <h3><span class="num">5</span> El gap SEO-AEO: la web de IESE no habla el idioma de los LLMs</h3>
+      <p>La diferencia de 15 puntos entre Perplexity (85) y Gemini (70) revela un problema fundamental: la web de IESE probablemente está optimizada para SEO tradicional (keywords, meta tags, backlinks) pero no para la comprensión semántica que requieren los modelos de lenguaje. Perplexity, que hace RAG (Retrieval-Augmented Generation) combinando múltiples fuentes en tiempo real, obtiene una visión más rica de IESE porque agrega información de muchas fuentes. Gemini, que depende más del propio índice de Google, solo ve lo que Google ha logrado estructurar del sitio web.</p>
+      <p>Esto señala que la arquitectura de información de iese.edu necesita una revisión profunda orientada a Entity SEO: definir claramente las entidades (IESE como organización, cada programa como oferta educativa, cada profesor como persona experta, cada campus como lugar) y conectarlas mediante datos estructurados y contenido semántico.</p>
+      <div class="highlight"><strong>Acción SEO/AEO:</strong> Implementar una estrategia completa de Entity SEO: (1) Knowledge Graph propio con JSON-LD interconectado en todo el sitio, (2) páginas de entidad para programas con FAQ schema, (3) contenido "Information Gain" que aporte datos únicos no disponibles en otras fuentes (estadísticas propias, investigaciones exclusivas, datos de impacto), (4) optimización del Google Knowledge Panel de IESE verificando y enriqueciendo la ficha, (5) considerar la publicación en Wikidata para reforzar las entidades.</div>
+    </div>
+  </div>
+</section>
+
+<!-- ═══════════════ VEREDICTO ═══════════════ -->
+<section class="section">
+  <div class="container">
+    <div class="verdict-banner">
+      <div>
+        <h3>Veredicto: IESE tiene reputación de líder,<br>pero <span>los LLMs aún no lo saben del todo</span></h3>
+        <p>La percepción de marca es excelente (88%), pero la posición en el mercado según los motores de IA (43%) no refleja la realidad. Hay un desacoplamiento entre la reputación offline/tradicional de IESE y cómo los sistemas de IA representan su posicionamiento competitivo. Cerrar este gap requiere una estrategia deliberada de AEO que traduzca el liderazgo real en señales que los LLMs puedan procesar.</p>
+      </div>
+      <div>
+        <div class="kpi-row">
+          <div class="kpi-box">
+            <div class="kpi-val" style="color:var(--st-green);">88%</div>
+            <div class="kpi-label">Percepción</div>
+          </div>
+          <div class="kpi-box">
+            <div class="kpi-val" style="color:var(--st-red);">43%</div>
+            <div class="kpi-label">Posición</div>
+          </div>
+          <div class="kpi-box">
+            <div class="kpi-val" style="color:var(--st-blue);">77</div>
+            <div class="kpi-label">Score medio</div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ═══════════════ PLAN DE ACCIÓN ═══════════════ -->
+<section class="section" style="background:var(--st-white);">
+  <div class="container">
+    <div class="section-header">
+      <div class="section-tag">Roadmap</div>
+      <h2>Plan de <span>acción SEO/AEO</span></h2>
+      <p>Acciones priorizadas para mejorar la visibilidad de IESE en motores de IA.</p>
+    </div>
+    <div class="action-grid">
+      <div class="action-card">
+        <div class="priority priority-critical">Prioridad Crítica</div>
+        <h4>Auditoría técnica SEO de iese.edu</h4>
+        <p>Crawling completo para detectar problemas de indexación, thin content, canonicalización y hreflang. Foco en las páginas de programas que deben ser las entidades principales.</p>
+      </div>
+      <div class="action-card">
+        <div class="priority priority-critical">Prioridad Crítica</div>
+        <h4>Implementar Entity SEO con Schema Markup</h4>
+        <p>JSON-LD completo: EducationalOrganization, Course, Person (claustro), Place (campus), FAQ, Review. Interconectar todas las entidades del Knowledge Graph propio.</p>
+      </div>
+      <div class="action-card">
+        <div class="priority priority-high">Prioridad Alta</div>
+        <h4>Estrategia de contenido "Information Gain"</h4>
+        <p>Publicar datos únicos (empleabilidad, salarios post-MBA, investigaciones del claustro) que los LLMs puedan citar como fuente primaria. Cada pieza debe aportar algo que no exista en otra fuente.</p>
+      </div>
+      <div class="action-card">
+        <div class="priority priority-high">Prioridad Alta</div>
+        <h4>Digital PR + Narrative Seeding</h4>
+        <p>Programa continuo de menciones en medios de autoridad con mensajes clave: "líder en formación ejecutiva", "innovación en educación", "impacto global". Objetivo: reforzar la posición en el mercado ante los LLMs.</p>
+      </div>
+      <div class="action-card">
+        <div class="priority priority-medium">Prioridad Media</div>
+        <h4>Optimizar Knowledge Panel de Google</h4>
+        <p>Verificar la ficha de Google Knowledge Panel, enriquecer Wikidata, y asegurar que los datos estructurados de la web alimenten correctamente el Knowledge Graph de Google (impacto directo en Gemini).</p>
+      </div>
+      <div class="action-card">
+        <div class="priority priority-medium">Prioridad Media</div>
+        <h4>Monitorización AEO trimestral</h4>
+        <p>Establecer un baseline con esta medición y repetir el análisis cada trimestre para medir el impacto de las acciones. Tracking especial en Gemini (el motor con mayor gap) y en la dimensión de Posición en el mercado.</p>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ═══════════════ FOOTER ═══════════════ -->
+<footer class="footer">
+  <div class="logo-text">Sun Tzu Growth</div>
+  <p>Informe generado con datos del AEO Grader de HubSpot + análisis experto SEO &bull; Abril 2026</p>
+  <p style="margin-top:8px;"><a href="https://suntzu-growth.com">suntzu-growth.com</a></p>
+</footer>
+
+<!-- ═══════════════ CHARTS JS ═══════════════ -->
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+  Chart.defaults.responsive = true;
+  Chart.defaults.maintainAspectRatio = false;
+
+  // Radar Chart
+  new Chart(document.getElementById('radarChart'), {
+    type: 'radar',
+    data: {
+      labels: ['Reconocimiento (/20)', 'Posición (/10)', 'Calidad (/20)', 'Percepción (/40)', 'Cuota (/10)'],
+      datasets: [
+        {
+          label: 'ChatGPT',
+          data: [75, 30, 85, 87.5, 70],
+          borderColor: '#1a1a2e',
+          backgroundColor: 'rgba(26,26,46,.08)',
+          borderWidth: 2,
+          pointRadius: 4,
+          pointBackgroundColor: '#1a1a2e'
+        },
+        {
+          label: 'Perplexity',
+          data: [85, 70, 85, 92.5, 70],
+          borderColor: '#7998ae',
+          backgroundColor: 'rgba(121,152,174,.10)',
+          borderWidth: 2,
+          pointRadius: 4,
+          pointBackgroundColor: '#7998ae'
+        },
+        {
+          label: 'Gemini',
+          data: [65, 30, 65, 85, 70],
+          borderColor: '#fe3f3c',
+          backgroundColor: 'rgba(254,63,60,.06)',
+          borderWidth: 2,
+          pointRadius: 4,
+          pointBackgroundColor: '#fe3f3c'
+        }
+      ]
+    },
+    options: {
+      scales: {
+        r: {
+          beginAtZero: true,
+          max: 100,
+          ticks: { stepSize: 25, font: { size: 10 }, backdropColor: 'transparent' },
+          grid: { color: 'rgba(0,0,0,.06)' },
+          pointLabels: { font: { size: 11, family: 'Host Grotesk' } }
+        }
+      },
+      plugins: {
+        legend: { position: 'bottom', labels: { font: { family: 'Host Grotesk', size: 12 }, padding: 16, usePointStyle: true } }
+      }
+    }
+  });
+
+  // Bar Chart
+  new Chart(document.getElementById('barChart'), {
+    type: 'bar',
+    data: {
+      labels: ['ChatGPT', 'Perplexity', 'Gemini'],
+      datasets: [
+        { label: 'Reconocimiento', data: [15, 17, 13], backgroundColor: '#7998ae' },
+        { label: 'Posición', data: [3, 7, 3], backgroundColor: '#fe3f3c' },
+        { label: 'Calidad', data: [17, 17, 13], backgroundColor: '#5a7a91' },
+        { label: 'Percepción', data: [35, 37, 34], backgroundColor: '#10b981' },
+        { label: 'Cuota', data: [7, 7, 7], backgroundColor: '#f59e0b' }
+      ]
+    },
+    options: {
+      scales: {
+        x: { stacked: true, grid: { display: false }, ticks: { font: { family: 'Host Grotesk', size: 12, weight: '600' } } },
+        y: { stacked: true, max: 100, grid: { color: 'rgba(0,0,0,.05)' }, ticks: { font: { size: 11 } } }
+      },
+      plugins: {
+        legend: { position: 'bottom', labels: { font: { family: 'Host Grotesk', size: 11 }, padding: 12, usePointStyle: true } }
+      }
+    }
+  });
+});
+</script>
+</body>
+</html>
