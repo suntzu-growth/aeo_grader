@@ -9,7 +9,7 @@ from fastapi.middleware.cors import CORSMiddleware
 from pydantic import BaseModel
 from dotenv import load_dotenv
 
-from emilio import ChatService, create_initial_state
+from emilio import ChatService
 
 load_dotenv()
 

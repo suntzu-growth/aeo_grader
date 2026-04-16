@@ -1,7 +1,8 @@
 FROM python:3.11-slim
 
-# Install system dependencies for Playwright/Chromium
-RUN apt-get update && apt-get install -y \
+# Install system dependencies for Playwright/Chromium + git
+RUN apt-get update && apt-get install -y --no-install-recommends \
+    git \
     wget \
     gnupg \
     ca-certificates \
@@ -47,7 +48,7 @@ COPY requirements.txt .
 RUN pip install --no-cache-dir -r requirements.txt
 
 # Install Playwright Chromium browser
-RUN playwright install chromium
+RUN playwright install --with-deps chromium
 
 COPY . .
 
