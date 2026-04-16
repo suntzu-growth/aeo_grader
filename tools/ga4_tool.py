@@ -1,17 +1,15 @@
 from __future__ import annotations
 
 """
-Google Analytics 4 Tool
------------------------
-Consulta la GA4 Data API usando Application Default Credentials (ADC).
+Google Analytics 4 Tool — AI Traffic Report
+--------------------------------------------
+Analiza el tráfico que llega a la web procedente de fuentes de IA
+(ChatGPT, Perplexity, Gemini, Claude, Copilot...) y las conversiones
+que generan, para correlacionar visibilidad AEO con impacto real de negocio.
 
-Autenticación:
+Autenticación: Application Default Credentials (ADC)
   - Local:      gcloud auth application-default login
-  - Cloud Run:  asignar la Service Account en la config del servicio
-                (sin JSON de credenciales, sin token.json)
-
-La Service Account debe tener el rol:
-  "Viewer" en la propiedad de GA4 (Google Analytics → Admin → Property Access Management)
+  - Cloud Run:  Service Account asignada en la config del servicio
 """
 
 import json
@@ -23,63 +21,116 @@ from google.analytics.data_v1beta.types import (
     Dimension,
     Metric,
     RunReportRequest,
+    FilterExpression,
+    FilterExpressionList,
+    Filter,
 )
 
+# ── Fuentes de IA conocidas en GA4 ────────────────────────────────────────────
+# GA4 las registra como sessionSource (dominio referrer) o como UTM source
+
+AI_SOURCES = [
+    # Dominios referrer
+    "chatgpt.com",
+    "chat.openai.com",
+    "perplexity.ai",
+    "claude.ai",
+    "gemini.google.com",
+    "bard.google.com",
+    "copilot.microsoft.com",
+    "bing.com",
+    "you.com",
+    # UTM sources comunes (si el sitio usa UTM tagging desde IA)
+    "chatgpt",
+    "perplexity",
+    "gemini",
+    "claude",
+    "copilot",
+]
 
 # ── Tool principal ─────────────────────────────────────────────────────────────
 
 async def buscar_ga4(input_data: str) -> str:
     """
-    Consulta Google Analytics 4 para una propiedad dada.
+    Informe de tráfico IA en GA4: sesiones y conversiones por fuente de IA.
 
     input_data (JSON string):
-      - property_id  (str, requerido): ID de la propiedad GA4, solo el número
-                      Ej: "123456789"
-      - start_date   (str, opcional): "YYYY-MM-DD" — default: hace 28 días
-      - end_date     (str, opcional): "YYYY-MM-DD" — default: ayer
-      - metrics      (list, opcional): métricas GA4
-                      default: ["sessions", "activeUsers", "screenPageViews"]
-      - dimensions   (list, opcional): dimensiones GA4
-                      default: ["pagePath"]
-      - row_limit    (int, opcional): máximo filas a devolver — default: 10
+      - property_id  (str, opcional): ID de la propiedad GA4.
+                      Default: "525948952"
+      - days_ago     (int, opcional): analizar los últimos N días.
+                      Usar esto en lugar de start/end para evitar errores de fecha.
+                      Default: 28
+      - start_date   (str, opcional): "YYYY-MM-DD" (ignorado si se usa days_ago)
+      - end_date     (str, opcional): "YYYY-MM-DD" (ignorado si se usa days_ago)
+      - row_limit    (int, opcional): máximo filas por fuente — default: 20
     """
     try:
         data = json.loads(input_data)
 
-        property_id = data.get("property_id")
-        if not property_id:
-            # Propiedad por defecto del proyecto
-            property_id = "525948952"
+        # Property ID con default
+        property_id = data.get("property_id") or "525948952"
 
-        # 1. Prioridad: days_ago (para evitar alucinaciones del LLM)
+        # Fechas — days_ago tiene prioridad para evitar alucinaciones del LLM
         days_ago = data.get("days_ago")
-        
         if days_ago:
             try:
-                days_int = int(days_ago)
+                days_int   = int(days_ago)
                 end_date   = str(date.today() - timedelta(days=1))
                 start_date = str(date.today() - timedelta(days=days_int))
             except Exception:
                 end_date   = data.get("end_date",   str(date.today() - timedelta(days=1)))
                 start_date = data.get("start_date", str(date.today() - timedelta(days=28)))
         else:
-            # Fechas por defecto: últimos 28 días
             end_date   = data.get("end_date",   str(date.today() - timedelta(days=1)))
             start_date = data.get("start_date", str(date.today() - timedelta(days=28)))
 
-        metrics_input    = data.get("metrics",    ["sessions", "activeUsers", "screenPageViews"])
-        dimensions_input = data.get("dimensions", ["pagePath"])
-        row_limit        = int(data.get("row_limit", 10))
+        row_limit = int(data.get("row_limit", 20))
 
-        # ADC — detecta automáticamente las credenciales (local o Cloud Run)
+        # ADC
         client = BetaAnalyticsDataClient()
 
+        # ── Filtro: solo sesiones de fuentes IA ───────────────────────────────
+        ai_filter = FilterExpression(
+            or_group=FilterExpressionList(
+                expressions=[
+                    FilterExpression(
+                        filter=Filter(
+                            field_name="sessionSource",
+                            string_filter=Filter.StringFilter(
+                                match_type=Filter.StringFilter.MatchType.EXACT,
+                                value=source,
+                                case_sensitive=False,
+                            ),
+                        )
+                    )
+                    for source in AI_SOURCES
+                ]
+            )
+        )
+
+        # ── Report: sesiones + conversiones por fuente ────────────────────────
         request = RunReportRequest(
             property=f"properties/{property_id}",
             date_ranges=[DateRange(start_date=start_date, end_date=end_date)],
-            metrics=[Metric(name=m) for m in metrics_input],
-            dimensions=[Dimension(name=d) for d in dimensions_input],
+            dimensions=[
+                Dimension(name="sessionSource"),
+                Dimension(name="sessionMedium"),
+            ],
+            metrics=[
+                Metric(name="sessions"),
+                Metric(name="activeUsers"),
+                Metric(name="conversions"),       # eventos de conversión totales
+                Metric(name="engagementRate"),    # calidad del tráfico
+                Metric(name="averageSessionDuration"),
+            ],
+            dimension_filter=ai_filter,
             limit=row_limit,
+            order_bys=[
+                {
+                    "metric": {"metric_name": "sessions"},
+                    "desc": True,
+                }
+            ],
         )
 
         response = client.run_report(request)
@@ -94,18 +145,43 @@ async def buscar_ga4(input_data: str) -> str:
                 row_data[met.name] = row.metric_values[i].value
             rows.append(row_data)
 
+        # ── Totales agregados ──────────────────────────────────────────────────
+        total_sessions    = sum(float(r.get("sessions", 0))    for r in rows)
+        total_users       = sum(float(r.get("activeUsers", 0)) for r in rows)
+        total_conversions = sum(float(r.get("conversions", 0)) for r in rows)
+
+        # ── Diagnóstico: ¿tiene la propiedad conversiones configuradas? ────────
+        has_conversions = total_conversions > 0
+        diagnostics = {}
+        if not has_conversions and rows:
+            diagnostics["warning_conversions"] = (
+                "La propiedad GA4 tiene tráfico de IA pero 0 conversiones registradas. "
+                "Probable causa: no hay eventos de conversión configurados en GA4 "
+                "(Goals / Key Events). Para activarlo: GA4 → Admin → Events → "
+                "marcar evento como conversión."
+            )
+        if not rows:
+            diagnostics["warning_no_ai_traffic"] = (
+                "No se encontró tráfico de fuentes de IA en el período analizado. "
+                "Posibles causas: (1) la propiedad no recibe tráfico de IA todavía, "
+                "(2) el tráfico de IA llega sin identificar (direct/none), "
+                "(3) el rango de fechas es demasiado corto."
+            )
+
         return json.dumps(
             {
-                "status":       "success",
-                "connection_verified": True,
-                "message":      "Conexión exitosa con la API de Google Analytics 4.",
-                "property_id":  property_id,
-                "start_date":   start_date,
-                "end_date":     end_date,
-                "metrics":      metrics_input,
-                "dimensions":   dimensions_input,
-                "total_rows":   len(rows),
-                "rows":         rows,
+                "status":               "success",
+                "connection_verified":  True,
+                "property_id":          property_id,
+                "start_date":           start_date,
+                "end_date":             end_date,
+                "summary": {
+                    "total_ai_sessions":    int(total_sessions),
+                    "total_ai_users":       int(total_users),
+                    "total_ai_conversions": int(total_conversions),
+                },
+                "by_source":            rows,
+                "diagnostics":          diagnostics,
             },
             ensure_ascii=False,
         )
