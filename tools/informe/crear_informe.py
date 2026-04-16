@@ -11,6 +11,7 @@ import yaml
 from dotenv import load_dotenv
 from langchain_anthropic import ChatAnthropic
 from langchain_core.messages import HumanMessage, SystemMessage
+from storage_utils import upload_html_to_gcs
 
 REPORT_TEMPLATE_PATH = "./rag/example_report.html"
 
@@ -225,17 +226,25 @@ No lo devuelvas tal cual: reescríbelo con los datos nuevos.
             ensure_ascii=False,
         )
 
-    output_dir = Path("./informes")
-    output_dir.mkdir(exist_ok=True)
-
     timestamp = datetime.now().strftime("%Y%m%d_%H%M%S")
-    file_path = output_dir / f"informe_aeo_{timestamp}.html"
-    file_path.write_text(html_output, encoding="utf-8")
+    filename = f"informe_aeo_{timestamp}.html"
+
+    try:
+        file_url = upload_html_to_gcs(html_output, filename)
+    except Exception as e:
+        return json.dumps(
+            {
+                "status": "error",
+                "message": f"Error subiendo el informe a GCS: {str(e)}",
+            },
+            ensure_ascii=False,
+        )
 
     return json.dumps(
         {
             "status": "success",
-            "html": html_output,
+            "file_url": file_url,
+            "filename": filename,
         },
         ensure_ascii=False,
     )

@@ -289,7 +289,73 @@
     .msg.user .bubble th, .msg.user .bubble td { border-color: rgba(255,255,255,0.2); }
     .bubble h1, .bubble h2 { font-size: 1.1rem; margin: 1rem 0 .5rem; }
     .bubble ul { padding-left: 1.2rem; }
-    
+
+    .reports-panel {
+      margin-top: 1.25rem;
+      padding-top: 1rem;
+      border-top: 1px solid var(--border);
+    }
+
+    .reports-header {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      font-size: .8rem;
+      font-weight: 700;
+      color: var(--text-main);
+      margin-bottom: .75rem;
+    }
+
+    #reports-count {
+      font-size: .7rem;
+      color: var(--text-muted);
+      background: white;
+      border: 1px solid var(--border);
+      border-radius: 999px;
+      padding: .15rem .45rem;
+    }
+
+    .reports-list {
+      display: flex;
+      flex-direction: column;
+      gap: .5rem;
+      max-height: 260px;
+      overflow-y: auto;
+    }
+
+    .report-item {
+      display: block;
+      background: white;
+      border: 1px solid var(--border);
+      border-radius: .65rem;
+      padding: .75rem .85rem;
+      text-decoration: none;
+      color: var(--text-main);
+      transition: all .2s;
+    }
+
+    .report-item:hover {
+      border-color: var(--primary);
+      box-shadow: var(--shadow-sm);
+    }
+
+    .report-name {
+      font-size: .8rem;
+      font-weight: 700;
+      line-height: 1.35;
+      margin-bottom: .2rem;
+      word-break: break-word;
+    }
+
+    .report-meta {
+      font-size: .68rem;
+      color: var(--text-muted);
+    }
+
+    .reports-empty {
+      font-size: .75rem;
+      color: var(--text-muted);
+    }
   </style>
 </head>
 <body>
@@ -336,6 +402,15 @@
           <a href="#" class="nav-item"><svg class="icon"><path d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"></path></svg> Reports History</a>
           <a href="#" class="nav-item active"><svg class="icon"><path d="M21 12a9 9 0 01-9 9m9-9a9 9 0 00-9-9m9 9H3m9 9a9 9 0 01-9-9m9 9c1.657 0 3-4.03 3-9s-1.343-9-3-9m0 18c-1.657 0-3-4.03-3-9s1.343-9 3-9m-9 9a9 9 0 019-9"></path></svg> AI Agent</a>
        </nav>
+        <div class="reports-panel">
+          <div class="reports-header">
+            <span>Informes</span>
+            <span id="reports-count">0</span>
+          </div>
+          <div id="reports-list" class="reports-list">
+            <div class="reports-empty">No hay informes todavía</div>
+          </div>
+        </div>
        <button class="btn-primary-nav" id="btn-generate">
          <svg class="icon" style="width:14px;height:14px" stroke-width="3"><line x1="12" y1="5" x2="12" y2="19"></line><line x1="5" y1="12" x2="19" y2="12"></line></svg> Generate Report
        </button>
@@ -526,6 +601,8 @@
   const inputEl     = document.getElementById("user-input");
   const sendBtn     = document.getElementById("btn-send");
   const welcomeMsg  = document.getElementById("welcome-msg");
+  const reportsListEl = document.getElementById("reports-list");
+  const reportsCountEl = document.getElementById("reports-count");
 
   let sessionId = null;
   let isLoading = false;
@@ -534,15 +611,19 @@
     loginScreen.style.display = "none";
     appEl.style.display = "block";
     sendBtn.disabled = false;
+    loadInformes();
     inputEl.focus();
   }
+
   function showLogin() {
     loginScreen.style.display = "flex";
     appEl.style.display = "none";
     sendBtn.disabled = true;
   }
 
-  if (sessionStorage.getItem(SESSION_KEY) === "ok") showApp();
+  if (sessionStorage.getItem(SESSION_KEY) === "ok") {
+    showApp();
+  }
 
   function doLogin() {
     const u = inpUser.value.trim();
@@ -635,6 +716,45 @@
   });
   sendBtn.addEventListener("click", sendMessage);
 
+  function formatReportDate(iso) {
+    if (!iso) return "";
+    const d = new Date(iso);
+    return d.toLocaleString("es-ES", {
+      day: "2-digit",
+      month: "2-digit",
+      year: "2-digit",
+      hour: "2-digit",
+      minute: "2-digit"
+    });
+  }
+
+  async function loadInformes() {
+    try {
+      const res = await fetch(`${API_BASE}/informes`);
+      const data = await res.json();
+
+      if (!res.ok) {
+        throw new Error(data.detail || "No se pudieron cargar los informes");
+      }
+
+      reportsCountEl.textContent = data.count ?? 0;
+
+      if (!data.items || data.items.length === 0) {
+        reportsListEl.innerHTML = `<div class="reports-empty">No hay informes todavía</div>`;
+        return;
+      }
+
+      reportsListEl.innerHTML = data.items.map(item => `
+        <a class="report-item" href="${item.url}" target="_blank" rel="noopener noreferrer">
+          <div class="report-name">${item.name}</div>
+          <div class="report-meta">${formatReportDate(item.created)}</div>
+        </a>
+      `).join("");
+    } catch (err) {
+      reportsListEl.innerHTML = `<div class="reports-empty">Error cargando informes</div>`;
+    }
+  }
+
   async function sendMessage() {
     const text = inputEl.value.trim();
     if (!text || isLoading) return;
@@ -658,6 +778,7 @@
       sessionId = data.session_id;
       typingEl.remove();
       addMessage("agent", data.reply);
+      loadInformes();
     } catch (err) {
       typingEl.remove();
       addMessage("agent", "⚠️ " + err.message);
@@ -758,6 +879,13 @@
   inputEl.addEventListener('input', function() {
       sendBtn.disabled = this.value.trim().length === 0;
   });
+  
+  setInterval(() => {
+    if (appEl.style.display === "block") {
+      loadInformes();
+    }
+  }, 15000);
+
 </script>
 </body>
 </html>

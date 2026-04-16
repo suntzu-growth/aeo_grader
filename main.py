@@ -8,7 +8,7 @@ from fastapi import FastAPI, HTTPException
 from fastapi.middleware.cors import CORSMiddleware
 from pydantic import BaseModel
 from dotenv import load_dotenv
-
+from storage_utils import list_informes_from_gcs
 from emilio import ChatService
 
 load_dotenv()
@@ -41,7 +41,13 @@ class ChatResponse(BaseModel):
 def health_check():
     return {"status": "ok", "service": "aeo-grader"}
 
-
+@app.get("/informes")
+def get_informes():
+    try:
+        return list_informes_from_gcs()
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=str(e))
+    
 @app.post("/chat", response_model=ChatResponse)
 async def chat(request: ChatRequest):
     session_id = request.session_id or str(uuid.uuid4())

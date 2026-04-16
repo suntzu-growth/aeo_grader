@@ -113,9 +113,7 @@ async def ejecutar_crear_informe(input_data: str) -> str:
     """
     out = await crear_informe(input_data)
     data = json.loads(out)
-    html = data["html"]
-    status = data["status"]
-    return status
+    return data
 
 
 # =========================
@@ -220,7 +218,7 @@ class ChatService:
             "informe_confirmado": False,
         }
 
-    async def chat(self, user_input: str):
+    async def chat(self, user_input: str, session_id: str):
         user_input = (user_input or "").strip()
         if not user_input:
             return "(mensaje vacío)"
@@ -230,14 +228,8 @@ class ChatService:
         out = await self.graph.ainvoke(self.state)
 
         self.state["messages"] = out["messages"]
-        self.state = save_aeo_output(self.state)
 
-        estado_informe = extract_updated_informe_from_ai(self.state["messages"])
-        if estado_informe:
-            if "informacion_informe" in estado_informe:
-                self.state["informacion_informe"] = estado_informe["informacion_informe"]
-            if "informe_confirmado" in estado_informe:
-                self.state["informe_confirmado"] = estado_informe["informe_confirmado"]
+        self.state = save_aeo_output(self.state)
 
         reply = get_last_assistant_text(self.state["messages"]) or "(sin respuesta)"
         return reply
