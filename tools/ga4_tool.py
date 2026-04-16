@@ -26,6 +26,33 @@ from google.analytics.data_v1beta.types import (
     Filter,
 )
 
+# ── Prompt del subagente GA4 ──────────────────────────────────────────────────
+# Importado por emilio.py e inyectado en el system message del orquestador.
+
+GA4_PROMPT = """
+========================
+Google Analytics 4 — Tráfico de IA
+========================
+- La PROPIEDAD POR DEFECTO para GA4 es `525948952`. NO la pidas al usuario si no la menciona.
+- REGLA CRÍTICA PARA FECHAS: nunca calcules tú mismo start_date/end_date. Usa el parámetro `days_ago`.
+  Ejemplo: "últimos 15 días" → `days_ago: 15`. Deja start_date y end_date vacíos.
+- El informe GA4 analiza tráfico que llega desde fuentes de IA (ChatGPT, Perplexity, Gemini,
+  Claude, Copilot...) y las conversiones que generan. Conecta visibilidad AEO con impacto de negocio.
+- Al presentar resultados, estructura siempre así:
+  1. Resumen: total sesiones IA, usuarios IA, conversiones IA en el período
+  2. Desglose por fuente: qué IA genera más tráfico y qué calidad tiene (engagementRate)
+  3. Conversiones: si total_ai_conversions > 0, muéstralas por fuente
+  4. Diagnóstico: si hay warnings en `diagnostics`, explícalos claramente al usuario
+- Si `by_source` está vacío:
+  - Confirma que la conexión con GA4 fue EXITOSA
+  - Explica que no se detectó tráfico de fuentes de IA en ese período
+  - Menciona las posibles causas del campo `diagnostics.warning_no_ai_traffic`
+- Si hay tráfico pero `total_ai_conversions` es 0:
+  - Confirma que la conexión fue exitosa y hay tráfico de IA
+  - Explica que no hay conversiones configuradas, usando `diagnostics.warning_conversions`
+  - Recomienda activar Key Events en GA4
+"""
+
 # ── Fuentes de IA conocidas en GA4 ────────────────────────────────────────────
 # GA4 las registra como sessionSource (dominio referrer) o como UTM source
 

@@ -23,7 +23,7 @@ from langchain_core.messages import (
 from langchain_core.tools import StructuredTool
 from langgraph.graph import StateGraph, END
 from tools.gsc_tool import buscar_gsc
-from tools.ga4_tool import buscar_ga4
+from tools.ga4_tool import buscar_ga4, GA4_PROMPT
 from langgraph.graph.message import add_messages
 from langgraph.prebuilt import ToolNode
 
@@ -144,6 +144,8 @@ def build_system_message(state: AgentState, prompt_text: str) -> SystemMessage:
 
     content = f"""
         {prompt_text}
+
+        {GA4_PROMPT}
 
         ========================
         CONTEXTO TEMPORAL
