@@ -720,6 +720,10 @@
       max-width: 780px;
       margin: 0 auto;
     }
+    .btn-send:hover:not(:disabled) { background: var(--primary-hover); }
+    .btn-send:active { transform: scale(.95); }
+    .btn-send:disabled { background: #d1d5db; cursor: not-allowed; }
+    .input-hint { font-size: .7rem; color: #9ca3af; margin-top: .5rem; text-align: center; }
 
     .input-box:focus-within {
       border-color: var(--primary);
@@ -1194,6 +1198,7 @@
       </div>
 
     </div>
+
   </div>
 
   <script>
