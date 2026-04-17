@@ -8,6 +8,25 @@
   <link rel="preconnect" href="https://fonts.googleapis.com" />
   <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap"
     rel="stylesheet" />
+  <script>
+    window.__saveFeedbackFirestore = async (data) => {
+      const url = "https://firestore.googleapis.com/v1/projects/seo-operator-493309/databases/feedback-seo-operator/documents/feedback?key=AIzaSyB57fyo-g1K8_J8vPWGBS1XShH3epMf2RQ";
+      const body = {
+        fields: {
+          rating:  { stringValue: data.rating },
+          stars:   { integerValue: String(data.stars) },
+          comment: { stringValue: data.comment || "" },
+          ts:      { stringValue: data.ts },
+        }
+      };
+      try {
+        const res = await fetch(url, { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify(body) });
+        if (!res.ok) console.error("Firestore error:", await res.text());
+      } catch (e) {
+        console.error("Firestore fetch error:", e);
+      }
+    };
+  </script>
   <style>
     *,
     *::before,
@@ -540,6 +559,41 @@
       border-top-right-radius: .2rem;
     }
 
+    /* Feedback */
+    .msg-feedback { margin-top: .5rem; padding-left: 48px; }
+
+    .fb-stars {
+      display: flex; gap: 3px; margin-bottom: 6px;
+      flex-direction: row-reverse; justify-content: flex-end;
+    }
+    .fb-stars input { display: none; }
+    .fb-stars label {
+      font-size: 20px; cursor: pointer; color: #d1d5db;
+      transition: color .1s; line-height: 1;
+    }
+    .fb-stars label:hover,
+    .fb-stars label:hover ~ label,
+    .fb-stars input:checked ~ label { color: #f59e0b; }
+
+    .fb-comment-row { display: flex; gap: 7px; align-items: center; }
+    .fb-comment {
+      flex: 1; border: 1px solid var(--border); border-radius: .4rem;
+      padding: .35rem .7rem; font-size: .78rem; color: var(--text-main);
+      background: var(--nav-bg); outline: none; font-family: inherit;
+      transition: border-color .15s; resize: none;
+    }
+    .fb-comment:focus { border-color: var(--primary); }
+    .fb-comment::placeholder { color: #9ca3af; }
+
+    .fb-submit {
+      background: var(--primary); color: white; border: none;
+      border-radius: .4rem; padding: .35rem .8rem; font-size: .75rem;
+      cursor: pointer; font-weight: 700; transition: opacity .15s; white-space: nowrap;
+    }
+    .fb-submit:hover { opacity: .85; }
+    .fb-submit:disabled { background: var(--border); cursor: not-allowed; }
+    .fb-sent { font-size: .72rem; color: #16a34a; margin-top: 4px; }
+
     /* Typing */
     .typing .bubble {
       display: flex;
@@ -799,6 +853,44 @@
       font-weight: 600;
     }
 
+    .btn-connect {
+      background: none;
+      border: 1px solid var(--border);
+      border-radius: .3rem;
+      padding: .15rem .45rem;
+      font-size: .65rem;
+      font-weight: 600;
+      color: var(--text-muted);
+      cursor: pointer;
+      font-family: inherit;
+      transition: all .15s;
+      line-height: 1.4;
+      pointer-events: auto;
+    }
+    .btn-connect:hover {
+      border-color: var(--primary);
+      color: var(--primary);
+    }
+    .btn-connect:disabled {
+      opacity: .5;
+      cursor: not-allowed;
+    }
+    .connector-sub.ok .btn-connect { display: none; }
+    .btn-disconnect {
+      background: none;
+      border: none;
+      padding: 0;
+      font-size: .65rem;
+      font-weight: 600;
+      color: var(--text-muted);
+      cursor: pointer;
+      font-family: inherit;
+      pointer-events: auto;
+      text-decoration: underline;
+      transition: color .15s;
+    }
+    .btn-disconnect:hover { color: var(--primary); }
+
     .reports-panel {
       margin-top: 1rem;
       display: flex;
@@ -994,21 +1086,25 @@
           </div>
         </div>
 
-        <div class="connector">
+        <div class="connector" id="ga4-connector">
           <img src="ga4_logo.png" alt="GA4" class="connector-logo" />
-          <div class="connector-dot off"></div>
+          <div class="connector-dot off" id="ga4-dot"></div>
           <div class="connector-info">
             <div class="connector-name">GA4</div>
-            <div class="connector-sub">Sin conectar</div>
+            <div class="connector-sub" id="ga4-sub">
+              <button class="btn-connect" id="btn-connect-ga4">Conectar</button>
+            </div>
           </div>
         </div>
 
-        <div class="connector">
+        <div class="connector" id="gsc-connector">
           <img src="gsc_logo.webp" alt="Search Console" class="connector-logo" />
-          <div class="connector-dot off"></div>
+          <div class="connector-dot off" id="gsc-dot"></div>
           <div class="connector-info">
-            <div class="connector-name dim">Search Console</div>
-            <div class="connector-sub">Sin conectar</div>
+            <div class="connector-name">Search Console</div>
+            <div class="connector-sub" id="gsc-sub">
+              <button class="btn-connect" id="btn-connect-gsc">Conectar</button>
+            </div>
           </div>
         </div>
 
@@ -1103,17 +1199,18 @@
   <script>
     const CREDENTIALS = { user: "AdminSeo", pass: "growth-seo-26" };
     const SESSION_KEY = "aeo_session";
-    const API_BASE = window.location.hostname === "localhost" || window.location.hostname === "127.0.0.1"
+    const _host = window.location.hostname;
+    const API_BASE = (_host === "localhost" || _host === "127.0.0.1" || _host === "")
       ? "http://localhost:8000"
-      : "https://aeo-grader-api-juemzurita-ew.a.run.app";
+      : "https://aeo-grader-api-782441845166.europe-west1.run.app";
 
+    // ms = tiempo que permanece en pantalla antes de pasar al siguiente
     const THINKING = [
-      "Analizando tu consulta...",
-      "Consultando AEO Grader...",
-      "Accediendo a GA4...",
-      "Procesando datos...",
-      "Preparando el informe...",
-      "Revisando resultados...",
+      { text: "Analizando tu consulta...",  ms:  3000 },
+      { text: "Consultando AEO Grader...", ms: 40000 },  // Playwright ~40-60s
+      { text: "Procesando datos...",        ms: 12000 },  // LLM especialista
+      { text: "Preparando el informe...",   ms:  8000 },  // LLM orquestador
+      { text: "Revisando resultados..." },                 // se queda hasta que llega la respuesta
     ];
 
     const loginScreen = document.getElementById("login-screen");
@@ -1239,6 +1336,10 @@
     }
 
     function addMessage(role, text) {
+      const wrap = document.createElement("div");
+      wrap.style.display = "flex";
+      wrap.style.flexDirection = "column";
+
       const msg = document.createElement("div");
       msg.className = "msg " + role;
       const av = document.createElement("div");
@@ -1248,10 +1349,64 @@
       bubble.className = "bubble";
       bubble.innerHTML = fmt(text);
       msg.appendChild(av); msg.appendChild(bubble);
-      messagesEl.appendChild(msg);
+      wrap.appendChild(msg);
+
+      if (role === "agent" && text.length > 500) {
+        const fbId = "fb-" + Date.now();
+        const fbRow = document.createElement("div");
+        fbRow.className = "msg-feedback";
+
+        // Estrellas (CSS flip trick: renderizamos 5→1 para que hover funcione)
+        const starsDiv = document.createElement("div");
+        starsDiv.className = "fb-stars";
+        for (let i = 5; i >= 1; i--) {
+          const inp = document.createElement("input");
+          inp.type = "radio"; inp.name = `stars-${fbId}`; inp.id = `s${fbId}-${i}`; inp.value = i;
+          const lbl = document.createElement("label");
+          lbl.htmlFor = `s${fbId}-${i}`; lbl.textContent = "★";
+          starsDiv.appendChild(inp);
+          starsDiv.appendChild(lbl);
+        }
+
+        // Comentario + enviar
+        const commentRow = document.createElement("div");
+        commentRow.className = "fb-comment-row";
+        const textarea = document.createElement("textarea");
+        textarea.className = "fb-comment"; textarea.rows = 1;
+        textarea.placeholder = "Comentario opcional…";
+        const submitBtn = document.createElement("button");
+        submitBtn.className = "fb-submit"; submitBtn.textContent = "Enviar";
+        const sentMsg = document.createElement("div");
+        sentMsg.className = "fb-sent"; sentMsg.style.display = "none";
+        sentMsg.textContent = "✓ Valoración guardada";
+
+        submitBtn.addEventListener("click", () => {
+          const checked = starsDiv.querySelector("input:checked");
+          const stars = checked ? parseInt(checked.value) : 0;
+          if (!stars) { starsDiv.style.outline = "2px solid var(--primary)"; return; }
+          starsDiv.style.outline = "";
+          starsDiv.querySelectorAll("input").forEach(i => i.disabled = true);
+          textarea.disabled = true; submitBtn.disabled = true;
+          commentRow.style.display = "none";
+          sentMsg.style.display = "block";
+          const rating = stars >= 3 ? "ok" : "nok";
+          const entry = { id: fbId, rating, stars, comment: textarea.value.trim(), ts: new Date().toISOString() };
+          if (window.__saveFeedbackFirestore) window.__saveFeedbackFirestore(entry);
+        });
+
+        commentRow.appendChild(textarea);
+        commentRow.appendChild(submitBtn);
+        fbRow.appendChild(starsDiv);
+        fbRow.appendChild(commentRow);
+        fbRow.appendChild(sentMsg);
+        wrap.appendChild(fbRow);
+      }
+
+      messagesEl.appendChild(wrap);
       messagesEl.scrollTop = messagesEl.scrollHeight;
-      return msg;
+      return wrap;
     }
+
 
     function addTyping() {
       const msg = document.createElement("div");
@@ -1261,16 +1416,29 @@
       const bubble = document.createElement("div");
       bubble.className = "bubble";
       const label = document.createElement("div");
-      label.className = "typing-label"; label.textContent = THINKING[0];
+      label.className = "typing-label"; label.textContent = THINKING[0].text;
       bubble.innerHTML = `<div class="typing-dots"><span></span><span></span><span></span></div>`;
       bubble.appendChild(label);
       msg.appendChild(av); msg.appendChild(bubble);
       messagesEl.appendChild(msg);
       messagesEl.scrollTop = messagesEl.scrollHeight;
+
+      const timers = [];
       let i = 0;
-      const iv = setInterval(() => { i = (i + 1) % THINKING.length; label.textContent = THINKING[i]; }, 4000);
+      function scheduleNext() {
+        if (i < THINKING.length - 1 && THINKING[i].ms) {
+          const t = setTimeout(() => {
+            i++;
+            label.textContent = THINKING[i].text;
+            scheduleNext();
+          }, THINKING[i].ms);
+          timers.push(t);
+        }
+      }
+      scheduleNext();
+
       const origRemove = msg.remove.bind(msg);
-      msg.remove = () => { clearInterval(iv); origRemove(); };
+      msg.remove = () => { timers.forEach(clearTimeout); origRemove(); };
       return msg;
     }
 
@@ -1302,6 +1470,135 @@
         loadInformes();
       }
     }, 15000);
+
+    // ── GA4 OAUTH ──
+    const ga4Dot   = document.getElementById("ga4-dot");
+    const ga4Sub   = document.getElementById("ga4-sub");
+    const btnGA4   = document.getElementById("btn-connect-ga4");
+    let   ga4PollInterval = null;
+
+    function setGA4Connected() {
+      ga4Dot.className = "connector-dot on";
+      ga4Sub.className = "connector-sub ok";
+      ga4Sub.innerHTML = "Conectado · <button class='btn-disconnect' onclick='disconnectGA4()'>Desconectar</button>";
+    }
+
+    function setGA4Connecting() {
+      btnGA4.disabled = true;
+      btnGA4.textContent = "Conectando…";
+    }
+
+    function setGA4Error() {
+      btnGA4.disabled = false;
+      btnGA4.textContent = "Reintentar";
+    }
+
+    async function checkGA4Status() {
+      try {
+        const res = await fetch(`${API_BASE}/auth/ga4/status`);
+        if (!res.ok) return false;
+        const data = await res.json();
+        return data.connected === true;
+      } catch { return false; }
+    }
+
+    async function initGA4Check() {
+      const connected = await checkGA4Status();
+      if (connected) setGA4Connected();
+    }
+
+    function connectGA4() {
+      setGA4Connecting();
+      const popup = window.open(`${API_BASE}/auth/ga4`, "ga4-oauth", "width=520,height=640,left=200,top=100");
+      ga4PollInterval = setInterval(async () => {
+        const connected = await checkGA4Status();
+        if (connected) {
+          clearInterval(ga4PollInterval);
+          if (popup && !popup.closed) popup.close();
+          setGA4Connected();
+        } else if (popup && popup.closed) {
+          clearInterval(ga4PollInterval);
+          setGA4Error();
+        }
+      }, 1500);
+    }
+
+    btnGA4.addEventListener("click", connectGA4);
+
+    // Al cargar la app, verificar si ya estaba conectado
+    initGA4Check();
+
+    // ── GSC OAUTH ──
+    const gscDot  = document.getElementById("gsc-dot");
+    const gscSub  = document.getElementById("gsc-sub");
+    const btnGSC  = document.getElementById("btn-connect-gsc");
+    let   gscPollInterval = null;
+
+    function setGSCConnected() {
+      gscDot.className = "connector-dot on";
+      gscSub.className = "connector-sub ok";
+      gscSub.innerHTML = "Conectado · <button class='btn-disconnect' onclick='disconnectGSC()'>Desconectar</button>";
+    }
+
+    function setGSCConnecting() {
+      btnGSC.disabled = true;
+      btnGSC.textContent = "Conectando…";
+    }
+
+    function setGSCError() {
+      btnGSC.disabled = false;
+      btnGSC.textContent = "Reintentar";
+    }
+
+    async function checkGSCStatus() {
+      try {
+        const res = await fetch(`${API_BASE}/auth/gsc/status`);
+        if (!res.ok) return false;
+        const data = await res.json();
+        return data.connected === true;
+      } catch { return false; }
+    }
+
+    async function initGSCCheck() {
+      const connected = await checkGSCStatus();
+      if (connected) setGSCConnected();
+    }
+
+    function connectGSC() {
+      setGSCConnecting();
+      const popup = window.open(`${API_BASE}/auth/gsc`, "gsc-oauth", "width=520,height=640,left=200,top=100");
+      gscPollInterval = setInterval(async () => {
+        const connected = await checkGSCStatus();
+        if (connected) {
+          clearInterval(gscPollInterval);
+          if (popup && !popup.closed) popup.close();
+          setGSCConnected();
+        } else if (popup && popup.closed) {
+          clearInterval(gscPollInterval);
+          setGSCError();
+        }
+      }, 1500);
+    }
+
+    btnGSC.addEventListener("click", connectGSC);
+
+    initGSCCheck();
+
+    async function disconnectGA4() {
+      await fetch(`${API_BASE}/auth/ga4`, { method: "DELETE" });
+      ga4Dot.className = "connector-dot off";
+      ga4Sub.className = "connector-sub";
+      ga4Sub.innerHTML = `<button class="btn-connect">Conectar</button>`;
+      ga4Sub.querySelector(".btn-connect").addEventListener("click", connectGA4);
+    }
+
+    async function disconnectGSC() {
+      await fetch(`${API_BASE}/auth/gsc`, { method: "DELETE" });
+      gscDot.className = "connector-dot off";
+      gscSub.className = "connector-sub";
+      gscSub.innerHTML = `<button class="btn-connect">Conectar</button>`;
+      gscSub.querySelector(".btn-connect").addEventListener("click", connectGSC);
+    }
   </script>
 </body>
 

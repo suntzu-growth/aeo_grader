@@ -9,3 +9,4 @@ node_modules/
 firebase/functions/node_modules/
 .env
 informes/
+*_client_secrets.json
